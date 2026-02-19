@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PE-Fabrikation – Workflow Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --brand-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: #fdfdff; 
+            color: #1e293b;
+            letter-spacing: -0.02em;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px -5px rgba(99, 102, 241, 0.08);
+            border-color: rgba(99, 102, 241, 0.2);
+        }
+
+        .sidebar-item {
+            position: relative;
+            transition: all 0.25s ease;
+        }
+        .sidebar-item.active {
+            background: var(--brand-gradient);
+            color: white !important;
+            box-shadow: 0 8px 20px -4px rgba(99, 102, 241, 0.4);
+        }
+        .sidebar-item:not(.active):hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .glow-button {
+            transition: all 0.3s ease;
+            background: var(--brand-gradient);
+            position: relative;
+            overflow: hidden;
+        }
+        .glow-button::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .glow-button:hover::after { opacity: 1; }
+        .glow-button:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--accent-glow); }
+
+        .compact-table td { padding: 0.85rem 1rem; }
+        .table-row-modern {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .table-row-modern:hover {
+            background-color: #f8fafc;
+            transform: scale(1.002);
+        }
+
+        .brand-watermark {
+            position: fixed;
+            bottom: -20px;
+            right: -20px;
+            font-size: 12rem;
+            font-weight: 900;
+            color: rgba(99, 102, 241, 0.02);
+            pointer-events: none;
+            z-index: -1;
+            user-select: none;
+        }
+
+        .view-transition {
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media print {
+            aside, .no-print, button, .search-container { display: none !important; }
+            main { margin-left: 0 !important; padding: 0 !important; width: 100% !important; background: white !important; }
+            .glass-card { border: none !important; box-shadow: none !important; background: white !important; }
+        }
+    </style>
+</head>
+<body class="antialiased overflow-x-hidden">
+    <div class="brand-watermark">PE-FAB</div>
+
+    <div id="app" class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 fixed inset-y-0 left-0 bg-[#0B0F1A] flex flex-col p-6 z-50 no-print">
+            <div class="mb-10 px-2">
+                <div class="flex items-center gap-3 mb-1">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    </div>
+                    <span class="text-xl font-extrabold text-white tracking-tight">PE-<span class="text-indigo-400">Fabrikation</span></span>
+                </div>
+                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] ml-12">Workflow Engine</div>
+            </div>
+
+            <nav class="flex-1 space-y-1.5">
+                <button onclick="changeView('dashboard')" id="nav-dashboard" class="sidebar-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-[13px] text-slate-400 text-left">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    <span>Pipeline</span>
+                </button>
+                <button onclick="changeView('stats')" id="nav-stats" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-[13px] text-slate-400 text-left">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    <span>Analytics</span>
+                </button>
+                <button onclick="changeView('archive')" id="nav-archive" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-[13px] text-slate-400 text-left">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+                    <span>Archiv</span>
+                </button>
+                <button onclick="changeView('team')" id="nav-team" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-[13px] text-slate-400 text-left">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.6560.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    <span>Team</span>
+                </button>
+            </nav>
+
+            <div class="mt-auto border-t border-slate-800 pt-6">
+                <div class="flex items-center gap-2 px-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                    System Online
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 ml-64 p-8 transition-all">
+            <header class="flex items-center justify-between mb-8 no-print">
+                <div>
+                    <h2 id="view-title" class="text-3xl font-extrabold text-slate-900 tracking-tight">Pipeline</h2>
+                    <p class="text-slate-400 text-sm font-medium mt-0.5" id="current-date"></p>
+                </div>
+                <div id="header-actions">
+                    <button onclick="openModal('order')" class="glow-button text-white px-6 py-3 rounded-xl font-bold text-sm shadow-lg flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        Neuer Auftrag
+                    </button>
+                </div>
+            </header>
+
+            <div id="view-dashboard" class="space-y-6 view-transition">
+                <!-- Statistics Area -->
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
+                    <div class="glass-card p-5 rounded-2xl">
+                        <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2">Live-Aufträge</span>
+                        <div class="text-3xl font-black text-slate-900" id="stat-active">0</div>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl">
+                        <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2">GZA Ausstehend</span>
+                        <div class="text-3xl font-black text-amber-500" id="stat-gza">0</div>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl">
+                        <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2">Frist Kritisch</span>
+                        <div class="text-3xl font-black text-rose-500" id="stat-deadline">0</div>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl">
+                        <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-2">GZA Erhalten offen</span>
+                        <div class="text-3xl font-black text-indigo-600" id="stat-gza-received-pending">0</div>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl overflow-hidden relative">
+                        <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-3">Monats-Auslastung</span>
+                        <div id="dashboard-team-capacities" class="space-y-2 max-h-[80px] overflow-y-auto pr-1"></div>
+                    </div>
+                </div>
+
+                <div class="search-container no-print">
+                    <div class="relative max-w-sm">
+                        <input type="text" id="pipeline-search" placeholder="Suche..." class="w-full bg-white/60 border border-slate-200 px-10 py-2.5 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm font-medium">
+                        <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left compact-table">
+                            <thead class="bg-slate-50/50 border-b border-slate-100">
+                                <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                    <th class="py-4 px-6">Objekt</th>
+                                    <th class="py-4 px-4 text-amber-600">GZA Frist</th>
+                                    <th class="py-4 px-4 text-rose-600">Erhalt</th>
+                                    <th class="py-4 px-4">Liefertermin</th>
+                                    <th class="py-4 px-4">Zeichner</th>
+                                    <th class="py-4 px-6 text-right">Aktionen</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pipeline-body" class="divide-y divide-slate-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats View -->
+            <div id="view-stats" class="hidden space-y-6 view-transition">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div class="lg:col-span-3 no-print">
+                        <div class="glass-card rounded-2xl p-4 sticky top-10">
+                            <h3 class="text-[10px] font-black uppercase tracking-widest text-indigo-500 mb-4">Berichte</h3>
+                            <div id="stats-time-list" class="space-y-1"></div>
+                            <!-- Wichtig: Hier ist der Button -->
+                            <button onclick="openModal('confirm-reset')" class="w-full mt-10 flex items-center justify-center gap-2 py-3 bg-rose-50 text-rose-600 rounded-xl font-bold text-[10px] uppercase hover:bg-rose-100 transition-all border border-rose-100 shadow-sm">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                Reset Analytics
+                            </button>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-9">
+                        <div id="stats-detail-card" class="glass-card rounded-3xl p-8 md:p-10 min-h-[600px]">
+                            <div id="stats-detail-empty" class="flex items-center justify-center h-[400px] text-slate-300 font-bold">Zeitraum wählen</div>
+                            <div id="stats-detail-content" class="hidden">
+                                <div id="stats-header" class="mb-10 flex flex-col md:flex-row justify-between items-end gap-6 border-b-2 border-slate-900 pb-8">
+                                    <div class="flex-1">
+                                        <h3 id="stats-display-title" class="text-4xl font-black text-slate-900 tracking-tighter leading-none">---</h3>
+                                        <p class="mt-2 text-slate-400 font-medium">Jahresperformance | PE-Fabrikation</p>
+                                        <button onclick="window.print()" class="mt-4 no-print glow-button text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-lg">PDF Export</button>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-[10px] font-black uppercase text-slate-400 mb-1">Gesamt Elemente</div>
+                                        <span id="stats-display-total" class="text-6xl font-black text-indigo-600 tracking-tighter leading-none">0</span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-10">
+                                    <h4 class="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
+                                        <div class="w-6 h-6 bg-slate-900 text-white text-[10px] rounded-md flex items-center justify-center">01</div> Monatsdetails & Zeichner-Performance
+                                    </h4>
+                                    <div id="stats-display-months" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+                                </div>
+
+                                <div class="mb-10">
+                                    <h4 class="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
+                                        <div class="w-6 h-6 bg-slate-900 text-white text-[10px] rounded-md flex items-center justify-center">02</div> Team-Jahresübersicht
+                                    </h4>
+                                    <div id="stats-display-team" class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6"></div>
+                                </div>
+
+                                <div>
+                                    <h4 class="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
+                                        <div class="w-6 h-6 bg-slate-900 text-white text-[10px] rounded-md flex items-center justify-center">03</div> Projektliste
+                                    </h4>
+                                    <div class="bg-white/50 border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+                                        <table class="w-full text-left compact-table">
+                                            <thead class="bg-slate-50 border-b border-slate-100">
+                                                <tr class="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                                    <th class="py-3 px-6">Objekt</th>
+                                                    <th class="py-3 px-4">Zeichner</th>
+                                                    <th class="py-3 px-4 text-center">Datum</th>
+                                                    <th class="py-3 px-4 text-right">Elemente</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="stats-display-projects" class="divide-y divide-slate-100"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Archive View -->
+            <div id="view-archive" class="hidden view-transition">
+                <div class="glass-card rounded-2xl overflow-hidden">
+                    <table class="w-full text-left compact-table">
+                        <thead class="border-b border-slate-100 bg-slate-50/50">
+                            <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                <th class="py-4 px-6">Objekt</th>
+                                <th class="py-4 px-4 text-center">Archiv-Datum</th>
+                                <th class="py-4 px-4">Zeichner</th>
+                                <th class="py-4 px-4 text-center">Elemente</th>
+                                <th class="py-4 px-6 text-right">Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody id="archive-body" class="divide-y divide-slate-50"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Team View -->
+            <div id="view-team" class="hidden view-transition">
+                <div id="team-list" class="grid grid-cols-1 md:grid-cols-5 gap-4"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal confirm template -->
+    <div id="modal-confirm" class="fixed inset-0 z-[110] hidden items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl text-center border border-slate-100">
+            <h3 id="confirm-title" class="text-xl font-black mb-2 text-slate-900">Bestätigen</h3>
+            <p id="confirm-msg" class="text-slate-500 text-sm mb-6 leading-relaxed"></p>
+            <div class="flex gap-3">
+                <button onclick="closeModal()" class="flex-1 px-4 py-3 font-bold text-slate-400 hover:bg-slate-50 rounded-xl transition-all">Abbrechen</button>
+                <button id="confirm-delete-btn" class="flex-1 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold py-3 shadow-lg shadow-rose-200 transition-all">Ausführen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Restliche Modals (Order, Team) -->
+    <div id="modal-order" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl border border-slate-100">
+            <h3 id="order-modal-title" class="text-2xl font-black mb-6 tracking-tight">Auftrag</h3>
+            <form id="order-form" class="space-y-4">
+                <input type="hidden" id="edit-id">
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest">Projektname</label>
+                    <input type="text" id="objekt" required class="w-full bg-slate-50 border border-slate-100 px-4 py-2.5 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest">Eingang</label>
+                        <input type="date" id="date_received" required class="w-full bg-slate-50 border border-slate-100 px-4 py-2.5 rounded-xl outline-none font-medium text-sm">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest">Liefertermin</label>
+                        <input type="date" id="date_delivery" required class="w-full bg-slate-50 border border-slate-100 px-4 py-2.5 rounded-xl outline-none font-medium text-sm">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-black uppercase text-indigo-500 tracking-widest">GZA Frist (Man.)</label>
+                        <input type="date" id="date_gza_manual" class="w-full bg-indigo-50/50 border border-indigo-100 px-4 py-2.5 rounded-xl outline-none font-medium text-sm">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-black uppercase text-emerald-500 tracking-widest">Erhalt (Man.)</label>
+                        <input type="date" id="date_gza_receive_manual" class="w-full bg-emerald-50/50 border border-emerald-100 px-4 py-2.5 rounded-xl outline-none font-medium text-sm">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest">Zeichner</label>
+                        <select id="assignee" class="w-full bg-slate-50 border border-slate-100 px-4 py-2.5 rounded-xl outline-none font-medium text-sm"></select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-widest">Elemente</label>
+                        <input type="number" id="elements" class="w-full bg-slate-50 border border-slate-100 px-4 py-2.5 rounded-xl outline-none font-medium text-sm">
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-6">
+                    <button type="button" onclick="closeModal()" class="flex-1 px-4 py-3 font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-all">Abbruch</button>
+                    <button type="submit" class="flex-1 glow-button text-white rounded-xl font-bold shadow-lg">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-team" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl text-center border border-slate-100">
+            <h3 class="text-2xl font-black mb-4 tracking-tight">Neues Mitglied</h3>
+            <input type="text" id="team-name" placeholder="Name" class="w-full bg-slate-50 border border-slate-100 px-4 py-3 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium mb-4 text-center">
+            <div class="flex gap-3">
+                <button onclick="closeModal()" class="flex-1 px-4 py-3 font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-all">Abbrechen</button>
+                <button onclick="addTeamMember()" class="flex-1 glow-button text-white rounded-xl font-bold shadow-lg">Hinzufügen</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, onSnapshot, doc, Timestamp, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyBrpOIH2U5Egl5yiVX4RM2I9XI5kUU1UCw", 
+            authDomain: "gzaa-d38df.firebaseapp.com", 
+            projectId: "gzaa-d38df", 
+            storageBucket: "gzaa-d38df.firebasestorage.app", 
+            messagingSenderId: "209638536455", 
+            appId: "1:209638536455:web:14e79e810dfe6cc65e81a2" 
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = 'gzaa-d38df';
+
+        const ordersCol = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
+        const teamCol = collection(db, 'artifacts', appId, 'public', 'data', 'team');
+
+        let user = null;
+        let orders = [];
+        let team = [];
+
+        const init = async () => {
+            document.getElementById('current-date').innerText = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+            await signInAnonymously(auth);
+            onAuthStateChanged(auth, (u) => { 
+                user = u; 
+                if (user) subscribeToData(); 
+            });
+        };
+
+        const subscribeToData = () => {
+            onSnapshot(ordersCol, (snapshot) => { 
+                orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); 
+                window.renderAll();
+                if (document.getElementById('nav-stats').classList.contains('active')) renderStatsSidebar();
+            });
+            onSnapshot(teamCol, (snapshot) => { 
+                team = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); 
+                updateAssigneeDropdown(); 
+                renderTeam(); 
+                updateHeaderStats(orders.filter(o => !o.archived));
+            });
+        };
+
+        const addBusinessDays = (d, n) => { 
+            let res = new Date(d); 
+            let added = 0; let step = n > 0 ? 1 : -1; let target = Math.abs(n);
+            while (added < target) { res.setDate(res.getDate() + step); if (res.getDay() !== 0 && res.getDay() !== 6) added++; } 
+            return res; 
+        };
+
+        const getBusinessDaysBetween = (s, e) => { 
+            let c = 0; let cur = new Date(s); cur.setHours(0,0,0,0); let tar = new Date(e); tar.setHours(0,0,0,0); 
+            if (cur > tar) return 0;
+            while (cur < tar) { if (cur.getDay() !== 0 && cur.getDay() !== 6) c++; cur.setDate(cur.getDate() + 1); } 
+            return c; 
+        };
+
+        const getBusinessDaysInCurrentMonth = () => {
+            const today = new Date();
+            const first = new Date(today.getFullYear(), today.getMonth(), 1);
+            const last = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            let count = 0;
+            let cur = new Date(first);
+            while(cur <= last) {
+                if(cur.getDay() !== 0 && cur.getDay() !== 6) count++;
+                cur.setDate(cur.getDate() + 1);
+            }
+            return count;
+        };
+
+        window.changeView = (v) => {
+            ['dashboard', 'stats', 'archive', 'team'].forEach(x => {
+                document.getElementById(`view-${x}`).classList.add('hidden');
+                document.getElementById(`nav-${x}`).classList.remove('active');
+            });
+            document.getElementById(`view-${v}`).classList.remove('hidden');
+            document.getElementById(`nav-${v}`).classList.add('active');
+            document.getElementById('view-title').innerText = v === 'dashboard' ? 'Pipeline' : v === 'stats' ? 'Analytics' : v === 'archive' ? 'Archiv' : 'Team';
+            
+            const headerActions = document.getElementById('header-actions');
+            if(v === 'team') {
+                headerActions.innerHTML = `<button onclick="openModal('team')" class="glow-button text-white px-6 py-3 rounded-xl font-bold text-sm shadow-lg flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>Mitglied hinzufügen</button>`;
+            } else {
+                headerActions.innerHTML = `<button onclick="openModal('order')" class="glow-button text-white px-6 py-3 rounded-xl font-bold text-sm shadow-lg flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>Neuer Auftrag</button>`;
+            }
+            if (v === 'stats') renderStatsSidebar();
+        };
+
+        window.openModal = (t, id = null) => {
+            const confirmModal = document.getElementById('modal-confirm');
+            const confirmBtn = document.getElementById('confirm-delete-btn');
+            const confirmTitle = document.getElementById('confirm-title');
+            const confirmMsg = document.getElementById('confirm-msg');
+
+            if (t === 'order') {
+                const f = document.getElementById('order-form'); f.reset();
+                document.getElementById('edit-id').value = id || '';
+                if (id) {
+                    const o = orders.find(x => x.id === id);
+                    document.getElementById('objekt').value = o.objekt;
+                    document.getElementById('date_received').value = o.date_received;
+                    document.getElementById('date_delivery').value = o.date_delivery;
+                    document.getElementById('date_gza_manual').value = o.date_gza_manual || '';
+                    document.getElementById('date_gza_receive_manual').value = o.date_gza_receive_manual || '';
+                    document.getElementById('assignee').value = o.assignee || '';
+                    document.getElementById('elements').value = o.elements;
+                }
+                document.getElementById('modal-order').classList.replace('hidden', 'flex');
+            } else if (t === 'team') {
+                document.getElementById('modal-team').classList.replace('hidden', 'flex');
+            } else if (t === 'confirm') {
+                confirmTitle.innerText = "Sicher?";
+                confirmMsg.innerText = "Diesen Auftrag wirklich permanent aus der Datenbank löschen?";
+                confirmBtn.innerText = "Löschen";
+                confirmBtn.className = "flex-1 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold py-3 shadow-lg transition-all";
+                confirmModal.classList.replace('hidden', 'flex');
+                confirmBtn.onclick = async () => { if(user) { await deleteDoc(doc(ordersCol, id)); closeModal(); } };
+            } else if (t === 'confirm-team') {
+                confirmTitle.innerText = "Teammitglied entfernen";
+                confirmMsg.innerText = "Möchtest du dieses Mitglied wirklich aus dem Team entfernen?";
+                confirmBtn.innerText = "Entfernen";
+                confirmBtn.className = "flex-1 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold py-3 shadow-lg transition-all";
+                confirmModal.classList.replace('hidden', 'flex');
+                confirmBtn.onclick = async () => { if(user) { await deleteDoc(doc(teamCol, id)); closeModal(); } };
+            } else if (t === 'confirm-reset') {
+                confirmTitle.innerText = "Analytics leeren";
+                confirmMsg.innerText = "Bist du sicher? Alle archivierten Aufträge (Berichte) werden unwiderruflich gelöscht. Dies kann nicht rückgängig gemacht werden.";
+                confirmBtn.innerText = "Daten löschen";
+                confirmBtn.className = "flex-1 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold py-3 shadow-lg transition-all";
+                confirmModal.classList.replace('hidden', 'flex');
+                confirmBtn.onclick = async () => {
+                    if(!user) return;
+                    const archived = orders.filter(o => o.archived);
+                    for (const o of archived) {
+                        try {
+                            await deleteDoc(doc(ordersCol, o.id));
+                        } catch (err) {
+                            console.error("Fehler beim Löschen:", err);
+                        }
+                    }
+                    closeModal();
+                    // UI Zurücksetzen
+                    document.getElementById('stats-detail-content').classList.add('hidden');
+                    document.getElementById('stats-detail-empty').classList.remove('hidden');
+                };
+            }
+        };
+
+        window.closeModal = () => document.querySelectorAll('[id^="modal-"]').forEach(m => m.classList.replace('flex', 'hidden'));
+
+        document.getElementById('order-form').onsubmit = async (e) => {
+            e.preventDefault(); if(!user) return;
+            const id = document.getElementById('edit-id').value;
+            const existing = id ? orders.find(o => o.id === id) : null;
+            const data = {
+                objekt: document.getElementById('objekt').value,
+                date_received: document.getElementById('date_received').value,
+                date_delivery: document.getElementById('date_delivery').value,
+                date_gza_manual: document.getElementById('date_gza_manual').value || null,
+                date_gza_receive_manual: document.getElementById('date_gza_receive_manual').value || null,
+                assignee: document.getElementById('assignee').value || null,
+                elements: parseInt(document.getElementById('elements').value) || 0,
+                archived: existing ? (existing.archived || false) : false,
+                gza_confirmed: existing ? (existing.gza_confirmed || false) : false,
+                gza_received: existing ? (existing.gza_received || false) : false,
+                archived_at: existing ? (existing.archived_at || null) : null
+            };
+            if (id) await updateDoc(doc(ordersCol, id), data); else await addDoc(ordersCol, data);
+            closeModal();
+        };
+
+        window.addTeamMember = async () => {
+            const n = document.getElementById('team-name').value.trim();
+            if (n && user) { await addDoc(teamCol, { name: n }); closeModal(); }
+        };
+
+        window.toggleGza = async (id, s) => { if (user) await updateDoc(doc(ordersCol, id), { gza_confirmed: s }); };
+        window.toggleGzaReceived = async (id, s) => { if (user) await updateDoc(doc(ordersCol, id), { gza_received: s }); };
+        window.archiveOrder = async (id) => { if (user) await updateDoc(doc(ordersCol, id), { archived: true, archived_at: new Date().toISOString() }); };
+        window.restoreOrder = async (id) => { if (user) await updateDoc(doc(ordersCol, id), { archived: false, archived_at: null }); };
+
+        window.renderAll = () => {
+            const s = document.getElementById('pipeline-search').value.toLowerCase();
+            renderPipeline(orders.filter(o => !o.archived && o.objekt.toLowerCase().includes(s)));
+            renderArchive(orders.filter(o => o.archived));
+            updateHeaderStats(orders.filter(o => !o.archived));
+        };
+
+        const renderPipeline = (list) => {
+            const body = document.getElementById('pipeline-body'); body.innerHTML = '';
+            const today = new Date(); today.setHours(0,0,0,0);
+            list.sort((a,b) => new Date(a.date_delivery) - new Date(b.date_delivery)).forEach(o => {
+                const frist = o.date_gza_manual || addBusinessDays(new Date(o.date_delivery), -12).toISOString().split('T')[0];
+                const stichtag = o.date_gza_receive_manual || addBusinessDays(new Date(o.date_delivery), -10).toISOString().split('T')[0];
+                const dFrist = getBusinessDaysBetween(today, new Date(frist));
+                let dRec = 0;
+                if (o.gza_confirmed) {
+                    if (o.gza_received) dRec = getBusinessDaysBetween(today, new Date(o.date_delivery));
+                    else dRec = getBusinessDaysBetween(today, new Date(stichtag));
+                }
+                const tr = document.createElement('tr'); tr.className = 'table-row-modern group';
+                tr.innerHTML = `
+                    <td class="py-3 px-6"><div class="font-bold text-slate-800 text-sm leading-tight">${o.objekt}</div><div class="text-[9px] text-slate-400 font-bold uppercase mt-0.5">${o.elements} Elem.</div></td>
+                    <td class="py-3 px-4">
+                        <div class="text-lg font-black text-amber-500 leading-none">${dFrist}</div>
+                        <div class="flex items-center gap-1.5 mt-1.5"><input type="checkbox" ${o.gza_confirmed ? 'checked' : ''} onchange="toggleGza('${o.id}', this.checked)" class="w-3 h-3 rounded text-indigo-500 cursor-pointer border-slate-300"><span class="text-[8px] font-bold uppercase text-slate-400">Bestätigt</span></div>
+                    </td>
+                    <td class="py-3 px-4">
+                        ${o.gza_confirmed ? `
+                            <div class="text-lg font-black ${o.gza_received ? 'text-emerald-500' : 'text-rose-500'} leading-none">${dRec}</div>
+                            <button onclick="toggleGzaReceived('${o.id}', ${!o.gza_received})" class="mt-1.5 text-[8px] font-black uppercase px-2 py-0.5 rounded border border-slate-100 bg-white hover:border-indigo-200 transition-all">${o.gza_received ? 'Fertig ✓' : 'Erhalten?'}</button>
+                        ` : '<span class="text-[10px] text-slate-200 font-black">—</span>'}
+                    </td>
+                    <td class="py-3 px-4"><span class="text-xs font-bold text-slate-900 border-b border-slate-900 pb-0.5">${new Date(o.date_delivery).toLocaleDateString('de-DE')}</span></td>
+                    <td class="py-3 px-4 text-xs font-medium text-slate-500">${o.assignee || '---'}</td>
+                    <td class="py-3 px-6 text-right opacity-0 group-hover:opacity-100 transition-all">
+                        <button onclick="openModal('order', '${o.id}')" class="p-1.5 text-slate-400 hover:text-indigo-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
+                        <button onclick="archiveOrder('${o.id}')" class="p-1.5 text-slate-400 hover:text-emerald-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M5 13l4 4L19 7"></path></svg></button>
+                        <button onclick="openModal('confirm', '${o.id}')" class="p-1.5 text-slate-400 hover:text-rose-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        };
+
+        const renderArchive = (list) => {
+            const body = document.getElementById('archive-body'); body.innerHTML = '';
+            list.sort((a,b) => new Date(b.archived_at) - new Date(a.archived_at)).forEach(o => {
+                const tr = document.createElement('tr'); tr.className = 'table-row-modern text-slate-400';
+                tr.innerHTML = `
+                    <td class="py-2.5 px-6"><div class="font-bold text-slate-600 text-sm">${o.objekt}</div></td>
+                    <td class="py-2.5 px-4 text-center text-xs">${o.archived_at ? new Date(o.archived_at).toLocaleDateString('de-DE') : '---'}</td>
+                    <td class="py-2.5 px-4 text-xs font-bold">${o.assignee || '---'}</td>
+                    <td class="py-2.5 px-4 text-center text-xs font-bold">${o.elements}</td>
+                    <td class="py-2.5 px-6 text-right"><button onclick="restoreOrder('${o.id}')" class="text-[9px] font-black uppercase text-indigo-500 hover:underline">Restore</button></td>
+                `;
+                body.appendChild(tr);
+            });
+        };
+
+        const renderTeam = () => {
+            const container = document.getElementById('team-list'); container.innerHTML = '';
+            team.forEach(m => {
+                const count = orders.filter(o => o.assignee === m.name && !o.archived).length;
+                const div = document.createElement('div');
+                div.className = 'glass-card p-4 rounded-2xl text-center group relative';
+                div.innerHTML = `
+                    <button onclick="openModal('confirm-team', '${m.id}')" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-rose-300 hover:text-rose-500"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                    <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl mx-auto flex items-center justify-center text-sm font-black mb-2">${m.name.charAt(0)}</div>
+                    <div class="text-[11px] font-bold text-slate-800 truncate">${m.name}</div>
+                    <div class="text-[8px] font-black text-slate-400 uppercase mt-1 tracking-tighter">${count} Aktive</div>
+                `;
+                container.appendChild(div);
+            });
+        };
+
+        const updateHeaderStats = (active) => {
+            const today = new Date(); today.setHours(0,0,0,0);
+            document.getElementById('stat-active').innerText = active.length;
+            document.getElementById('stat-gza').innerText = active.filter(o => !o.gza_confirmed).length;
+            document.getElementById('stat-deadline').innerText = active.filter(o => getBusinessDaysBetween(today, new Date(o.date_delivery)) < 5).length;
+            
+            const gzaReceivedPending = active.filter(o => o.gza_confirmed && !o.gza_received).length;
+            const statGzaReceivedElem = document.getElementById('stat-gza-received-pending');
+            statGzaReceivedElem.innerText = gzaReceivedPending;
+            if (gzaReceivedPending > 0) {
+                statGzaReceivedElem.classList.replace('text-indigo-600', 'text-amber-500');
+            } else {
+                statGzaReceivedElem.classList.replace('text-amber-500', 'text-indigo-600');
+            }
+
+            const capacityContainer = document.getElementById('dashboard-team-capacities');
+            capacityContainer.innerHTML = '';
+            const bDays = getBusinessDaysInCurrentMonth();
+            const monthlyCap = bDays * 10;
+
+            team.sort((a,b) => a.name.localeCompare(b.name)).forEach(m => {
+                const currentElements = active.filter(o => o.assignee === m.name).reduce((sum, o) => sum + (o.elements || 0), 0);
+                const perc = Math.round((currentElements / monthlyCap) * 100);
+                let color = 'bg-indigo-500';
+                if(perc > 90) color = 'bg-rose-500';
+                else if(perc > 70) color = 'bg-amber-500';
+
+                capacityContainer.innerHTML += `
+                    <div class="flex items-center gap-2">
+                        <span class="text-[9px] font-bold text-slate-600 w-12 truncate">${m.name}</span>
+                        <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full ${color} transition-all duration-1000" style="width: ${Math.min(100, perc)}%"></div>
+                        </div>
+                        <span class="text-[9px] font-black text-slate-400 w-6 text-right">${perc}%</span>
+                    </div>`;
+            });
+        };
+
+        const updateAssigneeDropdown = () => {
+            const sel = document.getElementById('assignee'); sel.innerHTML = '<option value="">Nicht zugewiesen</option>';
+            team.forEach(m => { sel.innerHTML += `<option value="${m.name}">${m.name}</option>`; });
+        };
+
+        const renderStatsSidebar = () => {
+            const container = document.getElementById('stats-time-list'); container.innerHTML = '';
+            const years = [...new Set(orders.filter(o => o.archived).map(o => new Date(o.archived_at).getFullYear()))].sort((a,b) => b-a);
+            years.forEach(y => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left px-4 py-2 rounded-lg font-bold text-[12px] text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition-all';
+                btn.innerText = `Jahresbericht ${y}`; btn.onclick = () => showStatsForYear(y);
+                container.appendChild(btn);
+            });
+        };
+
+        window.showStatsForYear = (year) => {
+            document.getElementById('stats-detail-empty').classList.add('hidden');
+            document.getElementById('stats-detail-content').classList.remove('hidden');
+            const filtered = orders.filter(o => o.archived && new Date(o.archived_at).getFullYear() === year);
+            const total = filtered.reduce((sum, o) => sum + (o.elements || 0), 0);
+            document.getElementById('stats-display-title').innerText = `Report ${year}`;
+            document.getElementById('stats-display-total').innerText = total.toLocaleString();
+
+            const months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+            const mDiv = document.getElementById('stats-display-months'); mDiv.innerHTML = '';
+            
+            for(let i=0; i<12; i++) {
+                const mOrders = filtered.filter(o => new Date(o.archived_at).getMonth() === i);
+                const mTotal = mOrders.reduce((sum, o) => sum + (o.elements || 0), 0);
+                
+                const teamStats = {};
+                mOrders.forEach(o => {
+                    const name = o.assignee || 'Unbekannt';
+                    teamStats[name] = (teamStats[name] || 0) + (o.elements || 0);
+                });
+
+                let teamHTML = '';
+                Object.entries(teamStats).sort((a,b) => b[1] - a[1]).forEach(([name, count]) => {
+                    teamHTML += `
+                        <div class="flex justify-between items-center text-[10px] py-1 border-b border-slate-100 last:border-0">
+                            <span class="font-medium text-slate-600">${name}</span>
+                            <span class="font-black text-slate-900">${count.toLocaleString()}</span>
+                        </div>`;
+                });
+
+                mDiv.innerHTML += `
+                    <div class="p-4 bg-white/60 border border-slate-100 rounded-2xl flex flex-col">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="text-[10px] font-black uppercase text-indigo-500 tracking-wider">${months[i]}</div>
+                            <div class="text-xl font-black text-slate-900">${mTotal.toLocaleString()}</div>
+                        </div>
+                        <div class="space-y-0.5 mt-auto">
+                            ${teamHTML || '<div class="text-[9px] text-slate-300 italic py-2">Keine Daten</div>'}
+                        </div>
+                    </div>`;
+            }
+
+            const tDiv = document.getElementById('stats-display-team'); tDiv.innerHTML = '';
+            team.forEach(m => {
+                const mData = filtered.filter(o => o.assignee === m.name);
+                const mSum = mData.reduce((sum, o) => sum + (o.elements || 0), 0);
+                tDiv.innerHTML += `
+                    <div>
+                        <div class="flex justify-between items-end mb-1.5">
+                            <span class="text-xs font-black text-slate-800">${m.name}</span>
+                            <span class="text-[11px] font-black text-indigo-600">${mSum.toLocaleString()} Elem.</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-indigo-500" style="width: ${Math.min(100, (mSum/(total||1))*100)}%"></div></div>
+                    </div>`;
+            });
+
+            const pBody = document.getElementById('stats-display-projects'); pBody.innerHTML = '';
+            filtered.sort((a,b) => new Date(b.archived_at) - new Date(a.archived_at)).forEach(o => {
+                pBody.innerHTML += `
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="py-3 px-6 font-bold text-slate-700 text-xs">${o.objekt}</td>
+                        <td class="py-3 px-4 text-[10px] font-bold text-slate-500">${o.assignee || '---'}</td>
+                        <td class="py-3 px-4 text-center text-[9px] font-black text-slate-400">${new Date(o.archived_at).toLocaleDateString('de-DE')}</td>
+                        <td class="py-3 px-4 text-right font-black text-slate-900 text-sm">${o.elements}</td>
+                    </tr>`;
+            });
+        };
+
+        document.getElementById('pipeline-search').addEventListener('input', window.renderAll);
+        window.onload = init;
+    </script>
+</body>
+</html>
