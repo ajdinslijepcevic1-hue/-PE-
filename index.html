@@ -321,7 +321,7 @@
                 </div>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>Objekt</th><th>Lieferdatum</th><th>Zeichner</th><th style="text-align:right">Aktionen</th></tr></thead>
+                        <thead><tr><th>Objekt</th><th>Lieferdatum</th><th>Zeichner</th><th>Status</th><th style="text-align:right">Aktionen</th></tr></thead>
                         <tbody id="montage-body"></tbody>
                     </table>
                 </div>
@@ -492,8 +492,11 @@
     });
 
     // HELPERS
-    const isActive = o => !o.is_done && !o.archived;   // ← KEY FIX: exclude both is_done AND legacy "archived" field
-    const isDone   = o => !!o.is_done;
+    // "active" = not done AND not legacy-archived → appears in Dashboard
+    const isActive   = o => !o.is_done && !o.archived;
+    // "montage"  = is_montage=true, regardless of is_done → stays in Montage folder always
+    const isMontage  = o => o.is_montage === true && !o.archived;
+    const isDone     = o => !!o.is_done;
 
     const q = id => (document.getElementById(id)?.value || '').toLowerCase().trim();
     const matches = (o, term) => !term || o.objekt.toLowerCase().includes(term) || (o.assignee||'').toLowerCase().includes(term);
@@ -513,31 +516,30 @@
 
     // RENDER ALL — single source of truth
     window.renderAll = () => {
-        const active = orders.filter(isActive);
-        const done   = orders.filter(isDone);
+        const active  = orders.filter(isActive);
+        const montage = orders.filter(isMontage);   // all montage incl. done ones
+        const done    = orders.filter(isDone);
 
-        // Dashboard
+        // Dashboard (only truly active = not done)
         const dTerm = q('search-dashboard');
         renderDashboard(active.filter(o => matches(o, dTerm)));
 
-        // Druckbereit — filter ONLY is_druckbereit=true from active
+        // Druckbereit — active only
         const pTerm = q('search-druckbereit');
-        const printList = active.filter(o => o.is_druckbereit === true && matches(o, pTerm));
-        renderFolder('druckbereit-body', 'print-count', printList);
+        renderFolder('druckbereit-body', 'print-count', active.filter(o => o.is_druckbereit === true && matches(o, pTerm)));
 
-        // Montage — filter ONLY is_montage=true from active
+        // Montage — ALL montage orders (including done), sorted by delivery
         const mTerm = q('search-montage');
-        const montageList = active.filter(o => o.is_montage === true && matches(o, mTerm));
-        renderFolder('montage-body', 'montage-count', montageList);
+        renderMontageFolder(montage.filter(o => matches(o, mTerm)));
 
-        // Erledigt
+        // Erledigt — global done list (non-montage ones, or all — user can see both)
         const eTerm = q('search-erledigt');
         renderErledigt(done.filter(o => matches(o, eTerm)));
 
-        // Stats (always unfiltered counts)
+        // Stats (unfiltered)
         document.getElementById('stat-total').textContent    = active.length;
         document.getElementById('stat-print').textContent    = active.filter(o => o.is_druckbereit === true).length;
-        document.getElementById('stat-montage').textContent  = active.filter(o => o.is_montage === true).length;
+        document.getElementById('stat-montage').textContent  = montage.length;
         document.getElementById('stat-deadline').textContent = active.filter(o => daysUntil(o.date_delivery) <= 5).length;
         document.getElementById('stat-done').textContent     = done.length;
 
@@ -598,7 +600,7 @@
         sa.indeterminate = !allSel && someSel;
     };
 
-    // FOLDER TABLE (Druckbereit / Montage)
+    // FOLDER TABLE (Druckbereit only)
     const renderFolder = (bodyId, countId, list) => {
         document.getElementById(countId).textContent = `${list.length} Aufträge`;
         const body = document.getElementById(bodyId);
@@ -614,6 +616,44 @@
                 <td><span class="deadline-chip ${deadlineClass(o.date_delivery)}">${formatDate(o.date_delivery)}</span></td>
                 <td><span style="font-size:12px;color:var(--text-2)">${o.assignee||'—'}</span></td>
                 <td><div class="actions-cell">
+                    <button class="action-btn" title="Bearbeiten" onclick="window.openEditModal('${o.id}')">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z"/></svg>
+                    </button>
+                </div></td>`;
+            body.appendChild(tr);
+        });
+    };
+
+    // MONTAGE FOLDER — stays even when done, has per-row Erledigt toggle
+    const renderMontageFolder = (list) => {
+        document.getElementById('montage-count').textContent = `${list.length} Aufträge`;
+        const body = document.getElementById('montage-body');
+        body.innerHTML = '';
+        if (!list.length) {
+            body.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">🔧</div><div class="empty-title">Noch keine Einträge</div><div class="empty-sub">Sobald Aufträge als "Inkl. Montage" markiert werden, erscheinen sie hier</div></div></td></tr>`;
+            return;
+        }
+        // Open first, then done — each group sorted by delivery
+        const open = sortByDelivery(list.filter(o => !isDone(o)));
+        const done = sortByDelivery(list.filter(o => isDone(o)));
+        [...open, ...done].forEach(o => {
+            const d = isDone(o);
+            const tr = document.createElement('tr');
+            // no visual dimming in montage folder
+            tr.innerHTML = `
+                <td><div class="object-name">${o.objekt}</div></td>
+                <td><span class="deadline-chip ${deadlineClass(o.date_delivery)}">${formatDate(o.date_delivery)}</span></td>
+                <td><span style="font-size:12px;color:var(--text-2)">${o.assignee||'—'}</span></td>
+                <td>${d
+                    ? `<span class="badge badge-done"><span class="dot dot-slate"></span>Erledigt</span>`
+                    : `<span class="badge badge-montage"><span class="dot dot-emerald"></span>Offen</span>`
+                }</td>
+                <td><div class="actions-cell">
+                    <button class="action-btn ${d ? 'active-done' : ''}"
+                        title="${d ? 'Als offen markieren' : 'Als erledigt markieren'}"
+                        onclick="window._statusModal('${o.id}','done')">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    </button>
                     <button class="action-btn" title="Bearbeiten" onclick="window.openEditModal('${o.id}')">
                         <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z"/></svg>
                     </button>
