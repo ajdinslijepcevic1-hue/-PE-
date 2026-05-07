@@ -7,33 +7,18 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
         :root {
-            --bg: #f5f4f0;
-            --surface: #ffffff;
-            --surface-2: #f0efe9;
-            --border: #e2e0d8;
-            --border-strong: #c8c5bb;
-            --text: #1a1917;
-            --text-2: #5c5a54;
-            --text-3: #9b9890;
-            --accent: #2d4a3e;
-            --accent-light: #e8f0ed;
-            --amber: #c47c2b;
-            --amber-light: #fdf3e3;
-            --rose: #b84040;
-            --rose-light: #fceaea;
-            --indigo: #3b5bdb;
-            --indigo-light: #eef2ff;
-            --emerald: #2e7d5a;
-            --emerald-light: #e8f5ee;
-            --slate: #64748b;
-            --slate-light: #f1f5f9;
-            --sidebar-w: 220px;
-            --radius: 10px;
-            --radius-lg: 16px;
+            --bg: #f5f4f0; --surface: #ffffff; --surface-2: #f0efe9;
+            --border: #e2e0d8; --border-strong: #c8c5bb;
+            --text: #1a1917; --text-2: #5c5a54; --text-3: #9b9890;
+            --accent: #2d4a3e; --accent-light: #e8f0ed;
+            --amber: #c47c2b; --amber-light: #fdf3e3;
+            --rose: #b84040; --rose-light: #fceaea;
+            --indigo: #3b5bdb; --indigo-light: #eef2ff;
+            --emerald: #2e7d5a; --emerald-light: #e8f5ee;
+            --slate: #64748b; --slate-light: #f1f5f9;
+            --sidebar-w: 220px; --radius: 10px; --radius-lg: 16px;
         }
-
         body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
         .layout { display: flex; min-height: 100vh; }
 
@@ -59,7 +44,6 @@
         .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
         .page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.03em; }
         .page-date { font-size: 12px; color: var(--text-3); margin-top: 2px; font-family:'DM Mono',monospace; }
-        .header-right { display: flex; align-items: center; gap: 10px; }
 
         /* BUTTONS */
         .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
@@ -72,8 +56,25 @@
         .btn-danger-solid { background: var(--rose); color: #fff; }
         .btn-danger-solid:hover { background: #a03535; }
 
+        /* SEARCH BAR */
+        .search-bar {
+            position: relative; margin-bottom: 14px;
+        }
+        .search-bar input {
+            width: 100%; max-width: 320px;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px; color: var(--text);
+            background: var(--surface);
+            outline: none; transition: border-color 0.15s;
+        }
+        .search-bar input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+        .search-bar svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-3); pointer-events: none; }
+
         /* BULK BAR */
-        .bulk-bar { display: none; align-items: center; gap: 12px; background: var(--text); color: #fff; padding: 10px 16px; border-radius: var(--radius); margin-bottom: 14px; animation: fadeIn 0.2s ease; }
+        .bulk-bar { display: none; align-items: center; gap: 12px; background: var(--text); color: #fff; padding: 10px 16px; border-radius: var(--radius); margin-bottom: 14px; }
         .bulk-bar.visible { display: flex; }
         .bulk-count { font-size: 13px; font-weight: 600; flex: 1; }
         .bulk-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
@@ -92,10 +93,8 @@
         .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; }
         .stat-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-3); font-family:'DM Mono',monospace; margin-bottom: 6px; }
         .stat-value { font-size: 28px; font-weight: 700; letter-spacing: -0.04em; }
-        .stat-rose { color: var(--rose); }
-        .stat-emerald { color: var(--emerald); }
-        .stat-indigo { color: var(--indigo); }
-        .stat-slate { color: var(--slate); }
+        .stat-rose { color: var(--rose); } .stat-emerald { color: var(--emerald); }
+        .stat-indigo { color: var(--indigo); } .stat-slate { color: var(--slate); }
 
         /* TABLE */
         .table-wrap { overflow-x: auto; }
@@ -106,7 +105,6 @@
         tbody tr:hover { background: var(--surface-2); }
         tbody tr.row-selected { background: #eef8f3 !important; }
         tbody td { padding: 13px 16px; vertical-align: middle; }
-
         .row-cb { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
 
         /* BADGES */
@@ -117,12 +115,9 @@
         .badge-both { background: var(--accent-light); color: var(--accent); border: 1px solid #c5ddd5; }
         .badge-done { background: var(--slate-light); color: var(--slate); border: 1px solid #e2e8f0; }
         .dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; }
-        .dot-indigo { background: var(--indigo); }
-        .dot-emerald { background: var(--emerald); }
-        .dot-accent { background: var(--accent); }
-        .dot-slate { background: var(--slate); }
+        .dot-indigo { background: var(--indigo); } .dot-emerald { background: var(--emerald); }
+        .dot-accent { background: var(--accent); } .dot-slate { background: var(--slate); }
 
-        /* DEADLINE */
         .deadline-chip { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; padding: 3px 9px; border-radius: 6px; }
         .deadline-ok { background: var(--surface-2); color: var(--text-2); }
         .deadline-warn { background: var(--amber-light); color: var(--amber); }
@@ -203,7 +198,7 @@
         .object-name { font-weight: 600; font-size: 13px; color: var(--text); }
 
         @media print {
-            aside, .no-print, .page-header button { display: none !important; }
+            aside, .no-print { display: none !important; }
             main { margin-left: 0 !important; padding: 0 !important; }
         }
     </style>
@@ -235,7 +230,7 @@
                 <div class="page-title" id="view-title">Dashboard</div>
                 <div class="page-date" id="current-date"></div>
             </div>
-            <div class="header-right" id="header-actions">
+            <div id="header-actions">
                 <button class="btn btn-primary" onclick="openOrderModal()">
                     <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>
                     Neuer Auftrag
@@ -251,6 +246,11 @@
                 <div class="stat-card"><div class="stat-label">Inkl. Montage</div><div class="stat-value stat-emerald" id="stat-montage">0</div></div>
                 <div class="stat-card"><div class="stat-label">Frist Kritisch</div><div class="stat-value stat-rose" id="stat-deadline">0</div></div>
                 <div class="stat-card"><div class="stat-label">Erledigt</div><div class="stat-value stat-slate" id="stat-done">0</div></div>
+            </div>
+
+            <div class="search-bar no-print">
+                <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="search-dashboard" placeholder="Auftrag suchen..." oninput="renderAll()">
             </div>
 
             <div class="bulk-bar no-print" id="bulk-bar">
@@ -275,11 +275,8 @@
                     <table>
                         <thead>
                             <tr>
-                                <th><input type="checkbox" class="row-cb" id="select-all" onchange="toggleSelectAll(this.checked)" title="Alle auswählen"></th>
-                                <th>Objekt</th>
-                                <th>Lieferdatum</th>
-                                <th>Zeichner</th>
-                                <th>Status</th>
+                                <th><input type="checkbox" class="row-cb" id="select-all" onchange="toggleSelectAll(this.checked)"></th>
+                                <th>Objekt</th><th>Lieferdatum</th><th>Zeichner</th><th>Status</th>
                                 <th style="text-align:right">Aktionen</th>
                             </tr>
                         </thead>
@@ -291,6 +288,10 @@
 
         <!-- DRUCKBEREIT -->
         <div class="view" id="view-druckbereit">
+            <div class="search-bar no-print">
+                <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="search-druckbereit" placeholder="Auftrag suchen..." oninput="renderAll()">
+            </div>
             <div class="card">
                 <div class="folder-header">
                     <div class="folder-icon folder-icon-print">🖨️</div>
@@ -308,6 +309,10 @@
 
         <!-- MONTAGE -->
         <div class="view" id="view-montage">
+            <div class="search-bar no-print">
+                <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="search-montage" placeholder="Auftrag suchen..." oninput="renderAll()">
+            </div>
             <div class="card">
                 <div class="folder-header">
                     <div class="folder-icon folder-icon-montage">🔧</div>
@@ -325,6 +330,10 @@
 
         <!-- ERLEDIGT -->
         <div class="view" id="view-erledigt">
+            <div class="search-bar no-print">
+                <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="search-erledigt" placeholder="Auftrag suchen..." oninput="renderAll()">
+            </div>
             <div class="card">
                 <div class="folder-header">
                     <div class="folder-icon folder-icon-done">✅</div>
@@ -348,8 +357,6 @@
 </div>
 
 <!-- MODALS -->
-
-<!-- Order Modal -->
 <div class="modal-overlay" id="modal-order">
     <div class="modal">
         <div class="modal-header">
@@ -388,7 +395,6 @@
     </div>
 </div>
 
-<!-- Status Confirm Modal -->
 <div class="modal-overlay" id="modal-status-confirm">
     <div class="modal">
         <div class="modal-header">
@@ -405,13 +411,12 @@
     </div>
 </div>
 
-<!-- Delete Confirm Modal -->
 <div class="modal-overlay" id="modal-delete">
     <div class="modal" style="max-width:360px">
         <div class="modal-body" style="padding-top:28px;text-align:center;">
             <div style="font-size:32px;margin-bottom:12px;">🗑️</div>
             <div style="font-size:16px;font-weight:700;margin-bottom:8px;" id="delete-modal-title">Löschen?</div>
-            <div style="font-size:13px;color:var(--text-2);line-height:1.6;" id="delete-modal-msg">Dieser Auftrag wird unwiderruflich gelöscht.</div>
+            <div style="font-size:13px;color:var(--text-2);line-height:1.6;" id="delete-modal-msg"></div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-ghost" onclick="closeModal('modal-delete')">Abbrechen</button>
@@ -420,7 +425,6 @@
     </div>
 </div>
 
-<!-- Team Modal -->
 <div class="modal-overlay" id="modal-team">
     <div class="modal" style="max-width:360px">
         <div class="modal-header">
@@ -467,7 +471,6 @@
     // INIT
     document.getElementById('current-date').innerText = new Date().toLocaleDateString('de-DE', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
 
-    // Erledigt toggle in form
     document.getElementById('is_done').addEventListener('change', function() {
         document.getElementById('erledigt-toggle-wrap').classList.toggle('on', this.checked);
     });
@@ -476,49 +479,81 @@
     onAuthStateChanged(auth, u => {
         user = u;
         if (user) {
-            onSnapshot(ordersCol, snap => { orders = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderAll(); });
-            onSnapshot(teamCol, snap => { team = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderTeam(); updateAssigneeDropdown(); });
+            onSnapshot(ordersCol, snap => {
+                orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderAll();
+            });
+            onSnapshot(teamCol, snap => {
+                team = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderTeam();
+                updateAssigneeDropdown();
+            });
         }
     });
 
     // HELPERS
-    const daysUntil = s => { if (!s) return 999; const t = new Date(); t.setHours(0,0,0,0); const d = new Date(s); d.setHours(0,0,0,0); return Math.round((d-t)/86400000); };
+    const isActive = o => !o.is_done && !o.archived;   // ← KEY FIX: exclude both is_done AND legacy "archived" field
+    const isDone   = o => !!o.is_done;
+
+    const q = id => (document.getElementById(id)?.value || '').toLowerCase().trim();
+    const matches = (o, term) => !term || o.objekt.toLowerCase().includes(term) || (o.assignee||'').toLowerCase().includes(term);
+
+    const daysUntil = s => { if (!s) return 999; const t=new Date(); t.setHours(0,0,0,0); const d=new Date(s); d.setHours(0,0,0,0); return Math.round((d-t)/86400000); };
     const formatDate = s => s ? new Date(s).toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
     const sortByDelivery = l => [...l].sort((a,b) => new Date(a.date_delivery)-new Date(b.date_delivery));
     const deadlineClass = s => { const d=daysUntil(s); return d<0?'deadline-crit':d<=5?'deadline-warn':'deadline-ok'; };
 
     const statusBadge = o => {
-        if (o.is_done) return `<span class="badge badge-done"><span class="dot dot-slate"></span>Erledigt</span>`;
+        if (isDone(o)) return `<span class="badge badge-done"><span class="dot dot-slate"></span>Erledigt</span>`;
         if (o.is_druckbereit && o.is_montage) return `<span class="badge badge-both"><span class="dot dot-accent"></span>Beides</span>`;
         if (o.is_druckbereit) return `<span class="badge badge-print"><span class="dot dot-indigo"></span>Druckbereit</span>`;
         if (o.is_montage) return `<span class="badge badge-montage"><span class="dot dot-emerald"></span>Montage</span>`;
         return `<span class="badge badge-pending">Offen</span>`;
     };
 
-    // RENDER ALL
-    const renderAll = () => {
-        const active = orders.filter(o => !o.is_done);
-        const done = orders.filter(o => o.is_done);
-        renderDashboard(active);
-        renderFolder('druckbereit-body', 'print-count', active.filter(o => o.is_druckbereit), 'Aufträge');
-        renderFolder('montage-body', 'montage-count', active.filter(o => o.is_montage), 'Aufträge');
-        renderErledigt(done);
-        document.getElementById('stat-total').textContent = active.length;
-        document.getElementById('stat-print').textContent = active.filter(o => o.is_druckbereit).length;
-        document.getElementById('stat-montage').textContent = active.filter(o => o.is_montage).length;
+    // RENDER ALL — single source of truth
+    window.renderAll = () => {
+        const active = orders.filter(isActive);
+        const done   = orders.filter(isDone);
+
+        // Dashboard
+        const dTerm = q('search-dashboard');
+        renderDashboard(active.filter(o => matches(o, dTerm)));
+
+        // Druckbereit — filter ONLY is_druckbereit=true from active
+        const pTerm = q('search-druckbereit');
+        const printList = active.filter(o => o.is_druckbereit === true && matches(o, pTerm));
+        renderFolder('druckbereit-body', 'print-count', printList);
+
+        // Montage — filter ONLY is_montage=true from active
+        const mTerm = q('search-montage');
+        const montageList = active.filter(o => o.is_montage === true && matches(o, mTerm));
+        renderFolder('montage-body', 'montage-count', montageList);
+
+        // Erledigt
+        const eTerm = q('search-erledigt');
+        renderErledigt(done.filter(o => matches(o, eTerm)));
+
+        // Stats (always unfiltered counts)
+        document.getElementById('stat-total').textContent    = active.length;
+        document.getElementById('stat-print').textContent    = active.filter(o => o.is_druckbereit === true).length;
+        document.getElementById('stat-montage').textContent  = active.filter(o => o.is_montage === true).length;
         document.getElementById('stat-deadline').textContent = active.filter(o => daysUntil(o.date_delivery) <= 5).length;
-        document.getElementById('stat-done').textContent = done.length;
+        document.getElementById('stat-done').textContent     = done.length;
+
         updateBulkBar();
     };
 
     // DASHBOARD TABLE
-    const renderDashboard = (active) => {
+    const renderDashboard = (list) => {
         const body = document.getElementById('dashboard-body');
         body.innerHTML = '';
-        document.getElementById('dash-count').textContent = `${active.length} Einträge`;
-        if (!active.length) { body.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Keine Aufträge</div><div class="empty-sub">Füge einen neuen Auftrag hinzu</div></div></td></tr>`; return; }
-
-        sortByDelivery(active).forEach(o => {
+        document.getElementById('dash-count').textContent = `${list.length} Einträge`;
+        if (!list.length) {
+            body.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Keine Aufträge</div><div class="empty-sub">Füge einen neuen Auftrag hinzu</div></div></td></tr>`;
+            return;
+        }
+        sortByDelivery(list).forEach(o => {
             const days = daysUntil(o.date_delivery);
             const sel = selectedIds.has(o.id);
             const tr = document.createElement('tr');
@@ -540,7 +575,7 @@
                         <button class="action-btn ${o.is_montage?'active-montage':''}" title="Inkl. Montage" onclick="window._statusModal('${o.id}','montage')">
                             <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
                         </button>
-                        <button class="action-btn ${o.is_done?'active-done':''}" title="Erledigt" onclick="window._statusModal('${o.id}','done')">
+                        <button class="action-btn ${isDone(o)?'active-done':''}" title="Erledigt" onclick="window._statusModal('${o.id}','done')">
                             <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                         </button>
                         <button class="action-btn" title="Bearbeiten" onclick="window.openEditModal('${o.id}')">
@@ -554,7 +589,8 @@
             body.appendChild(tr);
         });
 
-        const allIds = active.map(o => o.id);
+        const allActive = orders.filter(isActive);
+        const allIds = allActive.map(o => o.id);
         const allSel = allIds.length > 0 && allIds.every(id => selectedIds.has(id));
         const someSel = allIds.some(id => selectedIds.has(id));
         const sa = document.getElementById('select-all');
@@ -562,29 +598,40 @@
         sa.indeterminate = !allSel && someSel;
     };
 
-    // GENERIC FOLDER TABLE
-    const renderFolder = (bodyId, countId, list, label) => {
-        if (countId) document.getElementById(countId).textContent = `${list.length} ${label}`;
+    // FOLDER TABLE (Druckbereit / Montage)
+    const renderFolder = (bodyId, countId, list) => {
+        document.getElementById(countId).textContent = `${list.length} Aufträge`;
         const body = document.getElementById(bodyId);
         body.innerHTML = '';
-        if (!list.length) { body.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Noch keine Einträge</div><div class="empty-sub">Sobald Aufträge markiert werden, erscheinen sie hier</div></div></td></tr>`; return; }
+        if (!list.length) {
+            body.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Noch keine Einträge</div><div class="empty-sub">Sobald Aufträge markiert werden, erscheinen sie hier</div></div></td></tr>`;
+            return;
+        }
         sortByDelivery(list).forEach(o => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><div class="object-name">${o.objekt}</div></td>
                 <td><span class="deadline-chip ${deadlineClass(o.date_delivery)}">${formatDate(o.date_delivery)}</span></td>
                 <td><span style="font-size:12px;color:var(--text-2)">${o.assignee||'—'}</span></td>
-                <td><div class="actions-cell"><button class="action-btn" title="Bearbeiten" onclick="window.openEditModal('${o.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z"/></svg></button></div></td>`;
+                <td><div class="actions-cell">
+                    <button class="action-btn" title="Bearbeiten" onclick="window.openEditModal('${o.id}')">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z"/></svg>
+                    </button>
+                </div></td>`;
             body.appendChild(tr);
         });
     };
 
-    const renderErledigt = (done) => {
-        document.getElementById('erledigt-count').textContent = `${done.length} Aufträge`;
+    // ERLEDIGT TABLE
+    const renderErledigt = (list) => {
+        document.getElementById('erledigt-count').textContent = `${list.length} Aufträge`;
         const body = document.getElementById('erledigt-body');
         body.innerHTML = '';
-        if (!done.length) { body.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">✅</div><div class="empty-title">Noch nichts erledigt</div><div class="empty-sub">Abgeschlossene Aufträge erscheinen hier</div></div></td></tr>`; return; }
-        [...done].sort((a,b) => new Date(b.done_at||0)-new Date(a.done_at||0)).forEach(o => {
+        if (!list.length) {
+            body.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">✅</div><div class="empty-title">Noch nichts erledigt</div><div class="empty-sub">Abgeschlossene Aufträge erscheinen hier</div></div></td></tr>`;
+            return;
+        }
+        [...list].sort((a,b) => new Date(b.done_at||0)-new Date(a.done_at||0)).forEach(o => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><div class="object-name">${o.objekt}</div></td>
@@ -592,7 +639,9 @@
                 <td><span style="font-size:12px;color:var(--text-2)">${o.assignee||'—'}</span></td>
                 <td><div class="actions-cell">
                     <button class="btn btn-ghost" style="padding:4px 12px;font-size:11px;" onclick="window._restoreOrder('${o.id}')">Wiederherstellen</button>
-                    <button class="action-btn danger" title="Löschen" onclick="window._deleteModal(['${o.id}'])"><svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
+                    <button class="action-btn danger" title="Löschen" onclick="window._deleteModal(['${o.id}'])">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+                    </button>
                 </div></td>`;
             body.appendChild(tr);
         });
@@ -603,9 +652,13 @@
         const c = document.getElementById('team-list'); c.innerHTML = '';
         if (!team.length) { c.innerHTML = `<div style="grid-column:1/-1"><div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Kein Team</div><div class="empty-sub">Füge Teammitglieder hinzu</div></div></div>`; return; }
         team.forEach(m => {
-            const count = orders.filter(o => o.assignee===m.name && !o.is_done).length;
+            const count = orders.filter(o => o.assignee===m.name && isActive(o)).length;
             const d = document.createElement('div'); d.className = 'team-card';
-            d.innerHTML = `<button class="team-remove" onclick="window._deleteTeam('${m.id}')"><svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg></button><div class="team-avatar">${m.name.charAt(0).toUpperCase()}</div><div class="team-name">${m.name}</div><div class="team-count">${count} Aktive</div>`;
+            d.innerHTML = `
+                <button class="team-remove" onclick="window._deleteTeam('${m.id}')"><svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                <div class="team-avatar">${m.name.charAt(0).toUpperCase()}</div>
+                <div class="team-name">${m.name}</div>
+                <div class="team-count">${count} Aktive</div>`;
             c.appendChild(d);
         });
     };
@@ -618,28 +671,39 @@
     };
 
     // SELECTION
-    window._toggleRow = (id, checked) => { if(checked) selectedIds.add(id); else selectedIds.delete(id); updateBulkBar(); renderDashboard(orders.filter(o=>!o.is_done)); };
-    window.toggleSelectAll = (checked) => { orders.filter(o=>!o.is_done).forEach(o => checked?selectedIds.add(o.id):selectedIds.delete(o.id)); updateBulkBar(); renderDashboard(orders.filter(o=>!o.is_done)); };
-    window.clearSelection = () => { selectedIds.clear(); updateBulkBar(); renderDashboard(orders.filter(o=>!o.is_done)); };
+    window._toggleRow = (id, checked) => {
+        if (checked) selectedIds.add(id); else selectedIds.delete(id);
+        updateBulkBar();
+        renderDashboard(orders.filter(isActive).filter(o => matches(o, q('search-dashboard'))));
+    };
+    window.toggleSelectAll = (checked) => {
+        orders.filter(isActive).forEach(o => checked ? selectedIds.add(o.id) : selectedIds.delete(o.id));
+        updateBulkBar();
+        renderDashboard(orders.filter(isActive).filter(o => matches(o, q('search-dashboard'))));
+    };
+    window.clearSelection = () => { selectedIds.clear(); renderAll(); };
 
     const updateBulkBar = () => {
         const n = selectedIds.size;
-        document.getElementById('bulk-bar').classList.toggle('visible', n>0);
+        document.getElementById('bulk-bar').classList.toggle('visible', n > 0);
         document.getElementById('bulk-count').textContent = `${n} ausgewählt`;
     };
 
-    window.bulkDelete = () => {
-        const ids = [...selectedIds];
-        window._deleteModal(ids, () => { selectedIds.clear(); });
-    };
+    window.bulkDelete = () => { window._deleteModal([...selectedIds], () => selectedIds.clear()); };
 
     window.bulkMarkDone = () => {
         const ids = [...selectedIds]; if (!ids.length) return;
         document.getElementById('status-modal-title').textContent = `${ids.length} Aufträge erledigen`;
-        document.getElementById('status-modal-msg').innerHTML = `Möchtest du <strong>${ids.length} Aufträge</strong> als erledigt markieren?<br><span style="color:var(--text-3);font-size:12px;">Sie verschwinden aus dem Dashboard und erscheinen unter "Erledigt".</span>`;
+        document.getElementById('status-modal-msg').innerHTML = `Möchtest du <strong>${ids.length} Aufträge</strong> als erledigt markieren?<br><span style="color:var(--text-3);font-size:12px;">Sie verschwinden aus dem Dashboard.</span>`;
         const btn = document.getElementById('status-confirm-btn');
         btn.textContent = 'Als erledigt markieren'; btn.className = 'btn btn-primary';
-        btn.onclick = async () => { if(!user) return; const now = new Date().toISOString(); for(const id of ids) await updateDoc(doc(ordersCol,id),{is_done:true,done_at:now}); selectedIds.clear(); closeModal('modal-status-confirm'); };
+        btn.onclick = async () => {
+            if (!user) return;
+            const now = new Date().toISOString();
+            for (const id of ids) await updateDoc(doc(ordersCol, id), { is_done: true, done_at: now });
+            selectedIds.clear();
+            closeModal('modal-status-confirm');
+        };
         document.getElementById('modal-status-confirm').classList.add('open');
     };
 
@@ -656,7 +720,7 @@
     };
 
     window.openEditModal = (id) => {
-        const o = orders.find(x => x.id === id); if(!o) return;
+        const o = orders.find(x => x.id === id); if (!o) return;
         document.getElementById('edit-id').value = id;
         document.getElementById('objekt').value = o.objekt;
         document.getElementById('date_delivery').value = o.date_delivery;
@@ -672,52 +736,66 @@
         const name = document.getElementById('objekt').value.trim();
         const delivery = document.getElementById('date_delivery').value;
         const assignee = document.getElementById('assignee').value;
-        const isDone = document.getElementById('is_done').checked;
+        const isDoneVal = document.getElementById('is_done').checked;
         if (!name || !delivery || !user) return;
         const id = document.getElementById('edit-id').value;
-        const ex = id ? orders.find(o=>o.id===id) : null;
+        const ex = id ? orders.find(o => o.id === id) : null;
         const data = {
-            objekt: name, date_delivery: delivery, assignee: assignee||null,
-            is_druckbereit: ex ? (ex.is_druckbereit||false) : false,
-            is_montage: ex ? (ex.is_montage||false) : false,
-            is_done: isDone,
-            done_at: isDone ? (ex&&ex.done_at ? ex.done_at : new Date().toISOString()) : null,
-            created_at: ex ? (ex.created_at||new Date().toISOString()) : new Date().toISOString()
+            objekt: name,
+            date_delivery: delivery,
+            assignee: assignee || null,
+            // Preserve existing status flags, don't overwrite them
+            is_druckbereit: ex ? (ex.is_druckbereit === true) : false,
+            is_montage:     ex ? (ex.is_montage     === true) : false,
+            is_done:        isDoneVal,
+            done_at:        isDoneVal ? (ex?.done_at || new Date().toISOString()) : null,
+            archived:       false,   // reset legacy field
+            created_at:     ex?.created_at || new Date().toISOString()
         };
-        if (id) await updateDoc(doc(ordersCol, id), data); else await addDoc(ordersCol, data);
+        if (id) await updateDoc(doc(ordersCol, id), data);
+        else    await addDoc(ordersCol, data);
         closeModal('modal-order');
     };
 
-    // STATUS MODAL
+    // STATUS MODAL — single confirm before write
     window._statusModal = (orderId, type) => {
-        const o = orders.find(x => x.id===orderId); if(!o) return;
-        const map = { druckbereit: ['is_druckbereit','Druckbereit'], montage: ['is_montage','Inkl. Montage'], done: ['is_done','Erledigt'] };
-        const [field, label] = map[type];
-        const newVal = !o[field];
+        const o = orders.find(x => x.id === orderId); if (!o) return;
+        const fieldMap = { druckbereit: 'is_druckbereit', montage: 'is_montage', done: 'is_done' };
+        const labelMap = { druckbereit: 'Druckbereit', montage: 'Inkl. Montage', done: 'Erledigt' };
+        const field = fieldMap[type];
+        const label = labelMap[type];
+        const newVal = !(o[field] === true);  // strict check
+
         document.getElementById('status-modal-title').textContent = 'Status bestätigen';
-        document.getElementById('status-modal-msg').innerHTML = `Möchtest du <strong>"${o.objekt}"</strong> als <strong>${label}</strong> ${newVal?'markieren':'entfernen'}?${newVal&&type==='done'?`<br><span style="color:var(--text-3);font-size:12px;margin-top:4px;display:block;">Der Auftrag verschwindet aus dem Dashboard.</span>`:''}`;
+        document.getElementById('status-modal-msg').innerHTML =
+            `Möchtest du <strong>"${o.objekt}"</strong> als <strong>${label}</strong> ${newVal ? 'markieren' : 'entfernen'}?` +
+            (newVal && type === 'done' ? `<br><span style="color:var(--text-3);font-size:12px;margin-top:4px;display:block;">Der Auftrag verschwindet aus dem Dashboard.</span>` : '') +
+            (newVal && type !== 'done' ? `<br><span style="color:var(--text-3);font-size:12px;margin-top:4px;display:block;">Der Auftrag erscheint im Ordner "${label}".</span>` : '');
+
         const btn = document.getElementById('status-confirm-btn');
         btn.textContent = newVal ? `Als ${label} markieren` : `${label} entfernen`;
-        btn.className = `btn ${newVal?'btn-primary':'btn-danger'}`;
+        btn.className = `btn ${newVal ? 'btn-primary' : 'btn-danger'}`;
         btn.onclick = async () => {
-            if(!user) return;
-            const upd = {[field]: newVal};
-            if (field==='is_done') upd.done_at = newVal ? new Date().toISOString() : null;
+            if (!user) return;
+            const upd = { [field]: newVal };
+            if (field === 'is_done') upd.done_at = newVal ? new Date().toISOString() : null;
             await updateDoc(doc(ordersCol, orderId), upd);
             closeModal('modal-status-confirm');
         };
         document.getElementById('modal-status-confirm').classList.add('open');
     };
 
-    // DELETE MODAL
+    // DELETE
     window._deleteModal = (ids, afterFn) => {
         const n = ids.length;
-        document.getElementById('delete-modal-title').textContent = n>1 ? `${n} Aufträge löschen?` : 'Auftrag löschen?';
-        document.getElementById('delete-modal-msg').textContent = n>1 ? `Diese ${n} Aufträge werden unwiderruflich gelöscht.` : 'Dieser Auftrag wird unwiderruflich gelöscht.';
+        document.getElementById('delete-modal-title').textContent = n > 1 ? `${n} Aufträge löschen?` : 'Auftrag löschen?';
+        document.getElementById('delete-modal-msg').textContent = n > 1
+            ? `Diese ${n} Aufträge werden unwiderruflich gelöscht.`
+            : 'Dieser Auftrag wird unwiderruflich gelöscht.';
         document.getElementById('delete-confirm-btn').onclick = async () => {
-            if(!user) return;
-            for(const id of ids) await deleteDoc(doc(ordersCol, id));
-            if(afterFn) afterFn();
+            if (!user) return;
+            for (const id of ids) await deleteDoc(doc(ordersCol, id));
+            if (afterFn) afterFn();
             closeModal('modal-delete');
         };
         document.getElementById('modal-delete').classList.add('open');
@@ -725,18 +803,20 @@
 
     window._deleteTeam = (id) => {
         document.getElementById('delete-modal-title').textContent = 'Teammitglied entfernen?';
-        document.getElementById('delete-modal-msg').textContent = 'Möchtest du dieses Mitglied wirklich aus dem Team entfernen?';
-        document.getElementById('delete-confirm-btn').onclick = async () => { if(user) await deleteDoc(doc(teamCol, id)); closeModal('modal-delete'); };
+        document.getElementById('delete-modal-msg').textContent = 'Möchtest du dieses Mitglied wirklich entfernen?';
+        document.getElementById('delete-confirm-btn').onclick = async () => { if (user) await deleteDoc(doc(teamCol, id)); closeModal('modal-delete'); };
         document.getElementById('modal-delete').classList.add('open');
     };
 
-    window._restoreOrder = async (id) => { if(user) await updateDoc(doc(ordersCol, id), {is_done: false, done_at: null}); };
+    window._restoreOrder = async (id) => {
+        if (user) await updateDoc(doc(ordersCol, id), { is_done: false, done_at: null });
+    };
 
-    // TEAM
+    // TEAM ADD
     window.addTeamMember = async () => {
         const name = document.getElementById('team-name').value.trim();
-        if(!name || !user) return;
-        await addDoc(teamCol, {name});
+        if (!name || !user) return;
+        await addDoc(teamCol, { name });
         document.getElementById('team-name').value = '';
         closeModal('modal-team');
     };
@@ -744,20 +824,25 @@
     // VIEWS
     const ALL_VIEWS = ['dashboard','druckbereit','montage','erledigt','team'];
     window.showView = (v) => {
-        ALL_VIEWS.forEach(x => { document.getElementById(`view-${x}`).classList.remove('active'); document.getElementById(`nav-${x}`).classList.remove('active'); });
+        ALL_VIEWS.forEach(x => {
+            document.getElementById(`view-${x}`).classList.remove('active');
+            document.getElementById(`nav-${x}`).classList.remove('active');
+        });
         document.getElementById(`view-${v}`).classList.add('active');
         document.getElementById(`nav-${v}`).classList.add('active');
-        document.getElementById('view-title').textContent = {dashboard:'Dashboard',druckbereit:'Druckbereit',montage:'Inkl. Montage',erledigt:'Erledigt',team:'Team'}[v];
-        document.getElementById('header-actions').innerHTML = v==='team'
+        document.getElementById('view-title').textContent = { dashboard:'Dashboard', druckbereit:'Druckbereit', montage:'Inkl. Montage', erledigt:'Erledigt', team:'Team' }[v];
+        document.getElementById('header-actions').innerHTML = v === 'team'
             ? `<button class="btn btn-primary" onclick="openModal('modal-team')"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>Mitglied hinzufügen</button>`
             : `<button class="btn btn-primary" onclick="openOrderModal()"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>Neuer Auftrag</button>`;
     };
 
-    window.closeModal = (id) => document.getElementById(id).classList.remove('open');
-    window.openModal = (id) => document.getElementById(id).classList.add('open');
+    window.closeModal = id => document.getElementById(id).classList.remove('open');
+    window.openModal  = id => document.getElementById(id).classList.add('open');
 
-    document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
-    document.getElementById('team-name').addEventListener('keydown', e => { if(e.key==='Enter') window.addTeamMember(); });
+    document.querySelectorAll('.modal-overlay').forEach(el =>
+        el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); })
+    );
+    document.getElementById('team-name').addEventListener('keydown', e => { if (e.key === 'Enter') window.addTeamMember(); });
 </script>
 </body>
 </html>
