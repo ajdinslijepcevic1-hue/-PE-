@@ -165,6 +165,10 @@
         .notiz-bubble { display: inline-block; font-size: 11px; color: var(--text-2); background: var(--amber-light); border: 1px solid #f0d8a8; border-radius: 6px; padding: 4px 9px; max-width: 260px; word-break: break-word; line-height: 1.4; }
         .notiz-bubble::before { content: '💬 '; }
 
+        /* KUJTIM NOTIZ BUBBLE — sichtbar im Admin-Dashboard */
+        .z-notiz-bubble { display: inline-block; font-size: 11px; color: #166534; background: #dcfce7; border: 1px solid #bbf7d0; border-radius: 6px; padding: 4px 9px; max-width: 260px; word-break: break-word; line-height: 1.4; margin-top: 4px; }
+        .z-notiz-bubble::before { content: '✦ Kujtim: '; font-weight: 700; }
+
         /* PDF SECTION */
         .pdf-section { margin-top: 6px; }
         .pdf-list { display: flex; flex-direction: column; gap: 4px; }
@@ -792,11 +796,18 @@
         return `<span class="badge badge-pending">Offen</span>`;
     };
 
-    // Notiz bubble — sichtbar in allen Ansichten inkl. Erledigt
+    // Admin-Notiz (orange Bubble)
     const notizHtml = o => {
         if (!o.notiz || !o.notiz.trim()) return '';
         const escaped = o.notiz.replace(/</g,'&lt;').replace(/>/g,'&gt;');
         return `<div class="notiz-cell"><span class="notiz-bubble">${escaped}</span></div>`;
+    };
+
+    // Kujtims Notiz (grüne Bubble) — sichtbar nur im Admin-Dashboard
+    const zNotizHtml = o => {
+        if (!o.z_notiz || !o.z_notiz.trim()) return '';
+        const escaped = o.z_notiz.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        return `<div class="notiz-cell"><span class="z-notiz-bubble">${escaped}</span></div>`;
     };
 
     // ===== PDF MANAGEMENT =====
@@ -997,6 +1008,7 @@
                 <td>
                     <div class="object-name">${o.objekt}</div>
                     ${notizHtml(o)}
+                    ${zNotizHtml(o)}
                     ${renderPdfs(o, true)}
                 </td>
                 <td>
@@ -1047,7 +1059,7 @@
         sortByDelivery(list).forEach(o => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><div class="object-name">${o.objekt}</div>${notizHtml(o)}${renderPdfs(o, true)}</td>
+                <td><div class="object-name">${o.objekt}</div>${notizHtml(o)}${zNotizHtml(o)}${renderPdfs(o, true)}</td>
                 <td><span class="deadline-chip ${deadlineClass(o.date_delivery)}">${formatDate(o.date_delivery)}</span></td>
                 <td>${assigneeHtml(o)}</td>
                 <td>${flagsHtml(o)}</td>
@@ -1074,7 +1086,7 @@
             const d = isDone(o);
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><div class="object-name">${o.objekt}</div>${notizHtml(o)}${renderPdfs(o, true)}</td>
+                <td><div class="object-name">${o.objekt}</div>${notizHtml(o)}${zNotizHtml(o)}${renderPdfs(o, true)}</td>
                 <td><span class="deadline-chip ${deadlineClass(o.date_delivery)}">${formatDate(o.date_delivery)}</span></td>
                 <td>${assigneeHtml(o)}</td>
                 <td>${flagsHtml(o)}</td>
