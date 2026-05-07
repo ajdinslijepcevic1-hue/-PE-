@@ -160,6 +160,11 @@
         .flag-ausmass { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
         .flag-unterlagen { background: #fce7f3; color: #9d174d; border: 1px solid #fbcfe8; }
 
+        /* NOTIZ / TEXT FIELD */
+        .notiz-cell { margin-top: 6px; }
+        .notiz-bubble { display: inline-block; font-size: 11px; color: var(--text-2); background: var(--amber-light); border: 1px solid #f0d8a8; border-radius: 6px; padding: 4px 9px; max-width: 260px; word-break: break-word; line-height: 1.4; }
+        .notiz-bubble::before { content: '💬 '; }
+
         /* PDF SECTION */
         .pdf-section { margin-top: 6px; }
         .pdf-list { display: flex; flex-direction: column; gap: 4px; }
@@ -173,6 +178,33 @@
         .pdf-upload-btn { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border: 1px dashed var(--border-strong); border-radius: 7px; font-size: 11px; font-weight: 600; color: var(--text-3); background: none; cursor: pointer; margin-top: 4px; transition: all 0.15s; }
         .pdf-upload-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
         .pdf-progress { font-size: 10px; font-family:'DM Mono',monospace; color: var(--accent); margin-top: 4px; }
+
+        /* ===== KUJTIM NOTIZ FIELD ===== */
+        .z-notiz-wrap { display: flex; flex-direction: column; gap: 6px; min-width: 200px; max-width: 280px; }
+        .z-notiz-textarea {
+            width: 100%; padding: 8px 10px;
+            border: 1px solid var(--border); border-radius: var(--radius);
+            font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--text);
+            background: var(--surface); outline: none; resize: vertical;
+            min-height: 64px; line-height: 1.5;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .z-notiz-textarea:focus {
+            border-color: var(--kujtim);
+            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+        }
+        .z-notiz-textarea::placeholder { color: var(--text-3); }
+        .z-notiz-save-row { display: flex; align-items: center; gap: 8px; }
+        .z-notiz-save-btn {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 5px 12px; background: var(--kujtim); color: #fff;
+            border: none; border-radius: 7px; font-size: 11px; font-weight: 700;
+            cursor: pointer; transition: background 0.15s; white-space: nowrap;
+        }
+        .z-notiz-save-btn:hover { background: #15803d; }
+        .z-notiz-save-btn:disabled { background: var(--border-strong); cursor: not-allowed; }
+        .z-notiz-status { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--text-3); transition: color 0.3s; }
+        .z-notiz-status.saved { color: var(--kujtim); }
 
         /* VIEWS */
         .view { display: none; }
@@ -209,6 +241,8 @@
         .form-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-3); font-family: 'DM Mono', monospace; margin-bottom: 6px; }
         .form-input { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text); background: var(--surface); outline: none; transition: border-color 0.15s; }
         .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+        .form-textarea { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text); background: var(--surface); outline: none; transition: border-color 0.15s; resize: vertical; min-height: 80px; }
+        .form-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
         .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
         /* FLAGS CHECKBOXES */
@@ -412,7 +446,7 @@
                 </div>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>Objekt</th><th>Erledigt am</th><th>Zeichner</th><th style="text-align:right">Aktionen</th></tr></thead>
+                        <thead><tr><th>Objekt</th><th>Erledigt am</th><th>Zeichner</th><th>Notiz</th><th style="text-align:right">Aktionen</th></tr></thead>
                         <tbody id="erledigt-body"></tbody>
                     </table>
                 </div>
@@ -468,7 +502,7 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Objekt</th><th>Lieferdatum</th><th>Flags</th><th>PDFs</th><th style="text-align:right">Aktion</th>
+                                <th>Objekt</th><th>Lieferdatum</th><th>Flags</th><th>PDFs</th><th>Meine Notiz</th><th style="text-align:right">Aktion</th>
                             </tr>
                         </thead>
                         <tbody id="zeichner-body"></tbody>
@@ -502,10 +536,14 @@
                     <select id="assignee" class="form-input"></select>
                 </div>
             </div>
+            <!-- NOTIZ FIELD -->
+            <div class="form-group">
+                <label class="form-label">Notiz / Bemerkung</label>
+                <textarea id="notiz" class="form-textarea" placeholder="Interne Bemerkungen, Hinweise oder Zusatzinfos zum Auftrag..."></textarea>
+            </div>
             <div class="form-group">
                 <label class="form-label">Auftrags-Flags</label>
                 <div class="flags-row">
-                    <!-- Order: 1. Unterlagen 2. Ausmass 3. GZA 4. Angepasst -->
                     <label class="flag-check unterlagen">
                         <input type="checkbox" id="flag-unterlagen"> Unterlagen erhalten
                     </label>
@@ -621,7 +659,7 @@
             <div style="font-size:16px;font-weight:700;margin-bottom:8px;">Auftrag erledigen?</div>
             <div style="font-size:13px;color:var(--text-2);line-height:1.6;" id="erledigen-modal-msg"></div>
             <div style="margin-top:12px;padding:10px 14px;background:var(--rose-light);border:1px solid #f0c8c8;border-radius:var(--radius);font-size:12px;color:var(--rose);font-weight:600;">
-                ⚠️ Alle hochgeladenen PDFs werden dabei automatisch gelöscht.
+                ⚠️ Alle hochgeladenen PDFs werden dabei automatisch gelöscht. Notizen bleiben erhalten.
             </div>
         </div>
         <div class="modal-footer" style="margin-top:8px;">
@@ -733,7 +771,6 @@
 
     const flagsHtml = o => {
         let h = '<div class="flags-cell">';
-        // Order: 1. Unterlagen 2. Ausmass 3. GZA 4. Angepasst
         if (o.flag_unterlagen) h += '<span class="flag-chip flag-unterlagen">UNTERLAGEN</span>';
         if (o.flag_ausmass)    h += '<span class="flag-chip flag-ausmass">AUSMASS</span>';
         if (o.flag_gza)        h += '<span class="flag-chip flag-gza">GZA</span>';
@@ -753,6 +790,13 @@
         if (o.is_druckbereit) return `<span class="badge badge-print"><span class="dot dot-indigo"></span>Druckbereit</span>`;
         if (o.is_montage) return `<span class="badge badge-montage"><span class="dot dot-emerald"></span>Montage</span>`;
         return `<span class="badge badge-pending">Offen</span>`;
+    };
+
+    // Notiz bubble — sichtbar in allen Ansichten inkl. Erledigt
+    const notizHtml = o => {
+        if (!o.notiz || !o.notiz.trim()) return '';
+        const escaped = o.notiz.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        return `<div class="notiz-cell"><span class="notiz-bubble">${escaped}</span></div>`;
     };
 
     // ===== PDF MANAGEMENT =====
@@ -844,7 +888,6 @@
         await updateDoc(doc(ordersCol, orderId), { pdfs: newPdfs });
     };
 
-    // Helper: delete all PDF chunks for a given order+fileKey
     const deletePdfChunks = async (orderId, fileKey, totalChunks) => {
         for (let i = 0; i < totalChunks; i++) {
             const chunkDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'pdfchunks', `${orderId}_${fileKey}_${i}`);
@@ -852,7 +895,6 @@
         }
     };
 
-    // Delete ALL PDFs for an order
     const deleteAllPdfsForOrder = async (orderId) => {
         const o = orders.find(x => x.id === orderId);
         const pdfs = o?.pdfs || [];
@@ -864,7 +906,7 @@
         }
     };
 
-    const renderPdfs = (o, adminMode = true) => {
+    const renderPdfs = (o, adminMode = true, kujtimMode = false) => {
         const pdfs = o.pdfs || [];
         let h = '<div class="pdf-section">';
         if (pdfs.length) {
@@ -885,7 +927,7 @@
             });
             h += '</div>';
         }
-        if (adminMode) {
+        if (adminMode || kujtimMode) {
             h += `<button class="pdf-upload-btn" onclick="openPdfModal('${o.id}')">
                 <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 5v14M5 12h14"/></svg>
                 PDF hochladen
@@ -893,6 +935,27 @@
         }
         h += '</div>';
         return h;
+    };
+
+    // ===== KUJTIM NOTIZ SAVE =====
+    // Saves only the z_notiz field — does not touch any other order data
+    window.saveZNotiz = async (orderId, btnEl, statusEl) => {
+        if (!user) return;
+        const textarea = document.getElementById(`z-notiz-${orderId}`);
+        if (!textarea) return;
+        const val = textarea.value.trim();
+        btnEl.disabled = true;
+        statusEl.textContent = 'Speichern...';
+        statusEl.classList.remove('saved');
+        try {
+            await updateDoc(doc(ordersCol, orderId), { z_notiz: val || null });
+            statusEl.textContent = '✓ Gespeichert';
+            statusEl.classList.add('saved');
+            setTimeout(() => { statusEl.textContent = ''; statusEl.classList.remove('saved'); }, 2500);
+        } catch(e) {
+            statusEl.textContent = 'Fehler!';
+        }
+        btnEl.disabled = false;
     };
 
     // ===== RENDER ALL =====
@@ -933,6 +996,7 @@
                 <td><input type="checkbox" class="row-cb" ${sel?'checked':''} onchange="window._toggleRow('${o.id}',this.checked)"></td>
                 <td>
                     <div class="object-name">${o.objekt}</div>
+                    ${notizHtml(o)}
                     ${renderPdfs(o, true)}
                 </td>
                 <td>
@@ -983,7 +1047,7 @@
         sortByDelivery(list).forEach(o => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><div class="object-name">${o.objekt}</div>${renderPdfs(o, true)}</td>
+                <td><div class="object-name">${o.objekt}</div>${notizHtml(o)}${renderPdfs(o, true)}</td>
                 <td><span class="deadline-chip ${deadlineClass(o.date_delivery)}">${formatDate(o.date_delivery)}</span></td>
                 <td>${assigneeHtml(o)}</td>
                 <td>${flagsHtml(o)}</td>
@@ -1010,7 +1074,7 @@
             const d = isDone(o);
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><div class="object-name">${o.objekt}</div>${renderPdfs(o, true)}</td>
+                <td><div class="object-name">${o.objekt}</div>${notizHtml(o)}${renderPdfs(o, true)}</td>
                 <td><span class="deadline-chip ${deadlineClass(o.date_delivery)}">${formatDate(o.date_delivery)}</span></td>
                 <td>${assigneeHtml(o)}</td>
                 <td>${flagsHtml(o)}</td>
@@ -1032,15 +1096,19 @@
         const body = document.getElementById('erledigt-body');
         body.innerHTML = '';
         if (!list.length) {
-            body.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">✅</div><div class="empty-title">Noch nichts erledigt</div></div></td></tr>`;
+            body.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">✅</div><div class="empty-title">Noch nichts erledigt</div></div></td></tr>`;
             return;
         }
         [...list].sort((a,b) => new Date(b.done_at||0)-new Date(a.done_at||0)).forEach(o => {
             const tr = document.createElement('tr');
+            const notizContent = (o.notiz && o.notiz.trim())
+                ? `<span class="notiz-bubble">${o.notiz.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>`
+                : `<span style="font-size:11px;color:var(--text-3)">—</span>`;
             tr.innerHTML = `
                 <td><div class="object-name">${o.objekt}</div></td>
                 <td><span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text-3)">${o.done_at?formatDate(o.done_at):'—'}</span></td>
                 <td>${assigneeHtml(o)}</td>
+                <td>${notizContent}</td>
                 <td><div class="actions-cell">
                     <button class="btn btn-ghost" style="padding:4px 12px;font-size:11px;" onclick="window._restoreOrder('${o.id}')">Wiederherstellen</button>
                     <button class="action-btn danger" title="Löschen" onclick="window._deleteModal(['${o.id}'])">
@@ -1054,28 +1122,50 @@
     // ===== ZEICHNER VIEW =====
     window.renderZeichner = () => {
         const term = q('z-search');
-        // Show only active (not done) orders for Kujtim
         const myOrders = orders.filter(o => (o.assignee||'').toLowerCase() === 'kujtim' && !o.archived && !o.is_done && matches(o, term));
         document.getElementById('z-count').textContent = `${myOrders.length} Aufträge`;
         const body = document.getElementById('zeichner-body');
         body.innerHTML = '';
         if (!myOrders.length) {
-            body.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Keine Aufträge zugewiesen</div><div class="empty-sub">Der Admin muss Aufträge "Kujtim" zuweisen</div></div></td></tr>`;
+            body.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Keine Aufträge zugewiesen</div><div class="empty-sub">Der Admin muss Aufträge "Kujtim" zuweisen</div></div></td></tr>`;
             return;
         }
         sortByDelivery(myOrders).forEach(o => {
             const days = daysUntil(o.date_delivery);
+            const existingZNotiz = o.z_notiz || '';
+            const safeId = o.id.replace(/[^a-zA-Z0-9_-]/g, '_');
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>
                     <div class="object-name">${o.objekt}</div>
+                    ${notizHtml(o)}
                 </td>
                 <td>
                     <span class="deadline-chip ${deadlineClass(o.date_delivery)}">${formatDate(o.date_delivery)}</span>
                     ${days>=0&&days<=7?`<span style="margin-left:6px;font-size:10px;color:var(--rose);font-family:'DM Mono',monospace;font-weight:600;">in ${days}T</span>`:''}
                 </td>
                 <td>${flagsHtml(o)}</td>
-                <td>${renderPdfs(o, false)}</td>
+                <td>${renderPdfs(o, false, true)}</td>
+                <td>
+                    <div class="z-notiz-wrap">
+                        <textarea
+                            id="z-notiz-${o.id}"
+                            class="z-notiz-textarea"
+                            placeholder="Notiz hinzufügen..."
+                        >${existingZNotiz.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
+                        <div class="z-notiz-save-row">
+                            <button
+                                class="z-notiz-save-btn"
+                                id="z-notiz-btn-${o.id}"
+                                onclick="window.saveZNotiz('${o.id}', document.getElementById('z-notiz-btn-${o.id}'), document.getElementById('z-notiz-status-${o.id}'))"
+                            >
+                                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2zM17 21v-8H7v8M7 3v5h8"/></svg>
+                                Speichern
+                            </button>
+                            <span class="z-notiz-status" id="z-notiz-status-${o.id}"></span>
+                        </div>
+                    </div>
+                </td>
                 <td>
                     <div class="actions-cell">
                         <button class="btn-erledigen" onclick="window._kujtimErledigen('${o.id}','${o.objekt.replace(/'/g,"\\'")}')">
@@ -1088,15 +1178,12 @@
         });
     };
 
-    // Kujtim marks order as done + auto-deletes all PDFs
     window._kujtimErledigen = (orderId, objektName) => {
         document.getElementById('erledigen-modal-msg').innerHTML =
             `Möchtest du den Auftrag <strong>"${objektName}"</strong> als erledigt markieren?`;
         document.getElementById('erledigen-confirm-btn').onclick = async () => {
             if (!user) return;
-            // Delete all PDFs first
             await deleteAllPdfsForOrder(orderId);
-            // Mark as done
             await updateDoc(doc(ordersCol, orderId), {
                 is_done: true,
                 done_at: new Date().toISOString()
@@ -1175,6 +1262,7 @@
         document.getElementById('objekt').value = '';
         document.getElementById('date_delivery').value = '';
         document.getElementById('assignee').value = '';
+        document.getElementById('notiz').value = '';
         document.getElementById('flag-gza').checked = false;
         document.getElementById('flag-angepasst').checked = false;
         document.getElementById('flag-ausmass').checked = false;
@@ -1191,8 +1279,9 @@
         document.getElementById('objekt').value = o.objekt;
         document.getElementById('date_delivery').value = o.date_delivery;
         document.getElementById('assignee').value = o.assignee || '';
+        document.getElementById('notiz').value = o.notiz || '';
         document.getElementById('flag-gza').checked = !!o.flag_gza;
-        document.getElementById('flag-angepasst').checked = !!(o.flag_angepasst || o.flag_anpassen); // backwards compat
+        document.getElementById('flag-angepasst').checked = !!(o.flag_angepasst || o.flag_anpassen);
         document.getElementById('flag-ausmass').checked = !!o.flag_ausmass;
         document.getElementById('flag-unterlagen').checked = !!o.flag_unterlagen;
         const done = !!o.is_done;
@@ -1207,6 +1296,7 @@
         const delivery = document.getElementById('date_delivery').value;
         const assignee = document.getElementById('assignee').value;
         const isDoneVal = document.getElementById('is_done').checked;
+        const notizVal = document.getElementById('notiz').value.trim();
         if (!name || !delivery || !user) return;
         const id = document.getElementById('edit-id').value;
         const ex = id ? orders.find(o => o.id === id) : null;
@@ -1214,6 +1304,7 @@
             objekt: name,
             date_delivery: delivery,
             assignee: assignee || null,
+            notiz: notizVal || null,
             is_druckbereit: ex ? (ex.is_druckbereit === true) : false,
             is_montage:     ex ? (ex.is_montage === true) : false,
             is_done: isDoneVal,
