@@ -17,12 +17,42 @@
             --indigo: #3b5bdb; --indigo-light: #eef2ff;
             --emerald: #2e7d5a; --emerald-light: #e8f5ee;
             --slate: #64748b; --slate-light: #f1f5f9;
+            --kujtim: #16a34a;
             --sidebar-w: 220px; --radius: 10px; --radius-lg: 16px;
         }
         body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
-        .layout { display: flex; min-height: 100vh; }
 
-        /* SIDEBAR */
+        /* ===== LOGIN ===== */
+        #login-screen {
+            position: fixed; inset: 0; background: var(--text);
+            display: flex; align-items: center; justify-content: center; z-index: 999;
+        }
+        .login-box {
+            background: var(--surface); border-radius: var(--radius-lg);
+            padding: 40px 36px; width: 340px; text-align: center;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+        }
+        .login-logo { font-size: 22px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 4px; }
+        .login-logo span { color: #7db89a; }
+        .login-sub { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.12em; font-family: 'DM Mono', monospace; margin-bottom: 32px; }
+        .login-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-3); font-family: 'DM Mono', monospace; margin-bottom: 8px; text-align: left; }
+        .login-input {
+            width: 100%; padding: 14px 16px; border: 1px solid var(--border);
+            border-radius: var(--radius); font-family: 'DM Mono', monospace;
+            font-size: 22px; text-align: center; letter-spacing: 0.3em;
+            color: var(--text); outline: none; transition: border-color 0.15s;
+        }
+        .login-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+        .login-btn {
+            width: 100%; padding: 12px; background: var(--accent); color: #fff;
+            border: none; border-radius: var(--radius); font-size: 14px; font-weight: 700;
+            cursor: pointer; margin-top: 16px; transition: background 0.15s;
+        }
+        .login-btn:hover { background: #243d32; }
+        .login-error { color: var(--rose); font-size: 12px; margin-top: 10px; min-height: 18px; }
+
+        /* ===== APP LAYOUT ===== */
+        .layout { display: flex; min-height: 100vh; }
         aside { width: var(--sidebar-w); position: fixed; inset: 0 auto 0 0; background: var(--text); display: flex; flex-direction: column; padding: 28px 16px; z-index: 50; }
         .logo { padding: 0 8px 28px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 20px; }
         .logo-title { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.02em; }
@@ -34,16 +64,22 @@
         .nav-item.active { color: #fff; background: rgba(255,255,255,0.1); }
         .nav-item.active .nav-dot { background: #7db89a; }
         .nav-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; }
-        .sidebar-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 8px; padding-left: 8px; }
+        .sidebar-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; padding-left: 8px; }
         .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #7db89a; animation: pulse 2s infinite; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
         .status-text { font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.25); text-transform: uppercase; letter-spacing: 0.1em; font-family:'DM Mono',monospace; }
+        .logout-btn { background: none; border: none; color: rgba(255,255,255,0.25); cursor: pointer; padding: 4px; border-radius: 6px; transition: all 0.15s; }
+        .logout-btn:hover { color: var(--rose); }
 
-        /* MAIN */
         main { flex: 1; margin-left: var(--sidebar-w); padding: 32px 36px; min-height: 100vh; }
         .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
         .page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.03em; }
         .page-date { font-size: 12px; color: var(--text-3); margin-top: 2px; font-family:'DM Mono',monospace; }
+
+        /* ROLE BADGE */
+        .role-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; font-family:'DM Mono',monospace; }
+        .role-admin { background: var(--accent-light); color: var(--accent); border: 1px solid #c5ddd5; }
+        .role-zeichner { background: #dcfce7; color: var(--kujtim); border: 1px solid #bbf7d0; }
 
         /* BUTTONS */
         .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
@@ -56,24 +92,11 @@
         .btn-danger-solid { background: var(--rose); color: #fff; }
         .btn-danger-solid:hover { background: #a03535; }
 
-        /* SEARCH BAR */
-        .search-bar {
-            position: relative; margin-bottom: 14px;
-        }
-        .search-bar input {
-            width: 100%; max-width: 320px;
-            padding: 8px 12px 8px 36px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            font-family: 'DM Sans', sans-serif;
-            font-size: 13px; color: var(--text);
-            background: var(--surface);
-            outline: none; transition: border-color 0.15s;
-        }
+        .search-bar { position: relative; margin-bottom: 14px; }
+        .search-bar input { width: 100%; max-width: 320px; padding: 8px 12px 8px 36px; border: 1px solid var(--border); border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text); background: var(--surface); outline: none; transition: border-color 0.15s; }
         .search-bar input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
         .search-bar svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-3); pointer-events: none; }
 
-        /* BULK BAR */
         .bulk-bar { display: none; align-items: center; gap: 12px; background: var(--text); color: #fff; padding: 10px 16px; border-radius: var(--radius); margin-bottom: 14px; }
         .bulk-bar.visible { display: flex; }
         .bulk-count { font-size: 13px; font-weight: 600; flex: 1; }
@@ -85,10 +108,7 @@
         .bulk-btn-clear { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
         .bulk-btn-clear:hover { background: rgba(255,255,255,0.2); color: #fff; }
 
-        /* CARD */
         .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
-
-        /* STATS */
         .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
         .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; }
         .stat-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-3); font-family:'DM Mono',monospace; margin-bottom: 6px; }
@@ -96,7 +116,6 @@
         .stat-rose { color: var(--rose); } .stat-emerald { color: var(--emerald); }
         .stat-indigo { color: var(--indigo); } .stat-slate { color: var(--slate); }
 
-        /* TABLE */
         .table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; }
         thead th { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-3); font-family: 'DM Mono', monospace; padding: 12px 16px; background: var(--surface-2); border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
@@ -107,7 +126,6 @@
         tbody td { padding: 13px 16px; vertical-align: middle; }
         .row-cb { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
 
-        /* BADGES */
         .badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
         .badge-pending { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
         .badge-print { background: var(--indigo-light); color: var(--indigo); border: 1px solid #d0d9f5; }
@@ -123,7 +141,6 @@
         .deadline-warn { background: var(--amber-light); color: var(--amber); }
         .deadline-crit { background: var(--rose-light); color: var(--rose); }
 
-        /* ACTION BUTTONS */
         .action-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text-3); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
         .action-btn:hover { border-color: var(--border-strong); color: var(--text); background: var(--surface-2); }
         .action-btn.active-print { background: var(--indigo-light); border-color: #b0bef0; color: var(--indigo); }
@@ -132,12 +149,36 @@
         .action-btn.danger:hover { background: var(--rose-light); border-color: #f0c8c8; color: var(--rose); }
         .actions-cell { display: flex; align-items: center; gap: 5px; justify-content: flex-end; }
 
-        /* VIEW */
+        /* KUJTIM NAME */
+        .assignee-kujtim { color: var(--kujtim) !important; font-weight: 700 !important; }
+
+        /* FLAGS CHIPS */
+        .flags-cell { display: flex; gap: 4px; flex-wrap: wrap; }
+        .flag-chip { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 5px; font-family:'DM Mono',monospace; white-space: nowrap; }
+        .flag-gza { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+        .flag-angepasst { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
+        .flag-ausmass { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+        .flag-unterlagen { background: #fce7f3; color: #9d174d; border: 1px solid #fbcfe8; }
+
+        /* PDF SECTION */
+        .pdf-section { margin-top: 6px; }
+        .pdf-list { display: flex; flex-direction: column; gap: 4px; }
+        .pdf-item { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+        .pdf-name { font-size: 11px; font-family:'DM Mono',monospace; color: var(--text-2); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px; }
+        .pdf-btn { width: 22px; height: 22px; border-radius: 5px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+        .pdf-download { background: var(--indigo-light); color: var(--indigo); }
+        .pdf-download:hover { background: #dde5ff; }
+        .pdf-delete { background: var(--rose-light); color: var(--rose); }
+        .pdf-delete:hover { background: #f8d8d8; }
+        .pdf-upload-btn { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border: 1px dashed var(--border-strong); border-radius: 7px; font-size: 11px; font-weight: 600; color: var(--text-3); background: none; cursor: pointer; margin-top: 4px; transition: all 0.15s; }
+        .pdf-upload-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+        .pdf-progress { font-size: 10px; font-family:'DM Mono',monospace; color: var(--accent); margin-top: 4px; }
+
+        /* VIEWS */
         .view { display: none; }
         .view.active { display: block; animation: fadeIn 0.2s ease; }
         @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
 
-        /* FOLDER HEADER */
         .folder-header { display: flex; align-items: center; gap: 10px; padding: 16px 20px; background: var(--surface-2); border-bottom: 1px solid var(--border); }
         .folder-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; }
         .folder-icon-print { background: var(--indigo-light); }
@@ -146,16 +187,15 @@
         .folder-title { font-size: 14px; font-weight: 700; }
         .folder-count { margin-left: auto; font-family:'DM Mono',monospace; font-size: 11px; color: var(--text-3); }
 
-        /* EMPTY */
         .empty-state { padding: 60px 20px; text-align: center; color: var(--text-3); }
         .empty-icon { font-size: 32px; margin-bottom: 12px; }
         .empty-title { font-size: 14px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; }
         .empty-sub { font-size: 12px; }
 
-        /* MODAL */
+        /* MODALS */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
         .modal-overlay.open { display: flex; }
-        .modal { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); width: 100%; max-width: 440px; box-shadow: 0 20px 60px rgba(0,0,0,0.12); animation: modalIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .modal { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.12); animation: modalIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
         @keyframes modalIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
         .modal-header { padding: 22px 24px 0; display: flex; align-items: center; justify-content: space-between; }
         .modal-title { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
@@ -165,14 +205,22 @@
         .modal-footer { padding: 0 24px 22px; display: flex; gap: 10px; }
         .modal-footer .btn { flex: 1; justify-content: center; }
 
-        /* FORM */
         .form-group { margin-bottom: 16px; }
         .form-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-3); font-family: 'DM Mono', monospace; margin-bottom: 6px; }
         .form-input { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text); background: var(--surface); outline: none; transition: border-color 0.15s; }
         .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
         .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-        /* ERLEDIGT TOGGLE */
+        /* FLAGS CHECKBOXES */
+        .flags-row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .flag-check { display: flex; align-items: center; gap: 7px; padding: 7px 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.15s; user-select: none; font-size: 12px; font-weight: 700; }
+        .flag-check input { accent-color: var(--accent); width: 14px; height: 14px; }
+        .flag-check:has(input:checked) { border-color: var(--accent); background: var(--accent-light); }
+        .flag-check.gza:has(input:checked) { background: #fef3c7; border-color: #fde68a; }
+        .flag-check.angepasst:has(input:checked) { background: #ede9fe; border-color: #ddd6fe; }
+        .flag-check.ausmass:has(input:checked) { background: #e0f2fe; border-color: #bae6fd; }
+        .flag-check.unterlagen:has(input:checked) { background: #fce7f3; border-color: #fbcfe8; }
+
         .erledigt-toggle { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: all 0.15s; user-select: none; }
         .erledigt-toggle:hover { border-color: var(--border-strong); background: var(--surface-2); }
         .erledigt-toggle.on { border-color: #cbd5e1; background: var(--slate-light); }
@@ -197,6 +245,10 @@
 
         .object-name { font-weight: 600; font-size: 13px; color: var(--text); }
 
+        /* KUJTIM ERLEDIGEN BUTTON */
+        .btn-erledigen { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: var(--emerald-light); color: var(--emerald); border: 1px solid #a0d0bc; border-radius: var(--radius); font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+        .btn-erledigen:hover { background: #c0e8d4; border-color: var(--emerald); }
+
         @media print {
             aside, .no-print { display: none !important; }
             main { margin-left: 0 !important; padding: 0 !important; }
@@ -204,8 +256,21 @@
     </style>
 </head>
 <body>
-<div class="layout">
 
+<!-- ===== LOGIN ===== -->
+<div id="login-screen">
+    <div class="login-box">
+        <div class="login-logo">PE-<span>Fabrikation</span></div>
+        <div class="login-sub">Workflow Engine</div>
+        <label class="login-label">Zugangscode eingeben</label>
+        <input type="password" class="login-input" id="login-code" maxlength="4" placeholder="····" oninput="this.value=this.value.replace(/\D/g,'')">
+        <button class="login-btn" onclick="doLogin()">Anmelden</button>
+        <div class="login-error" id="login-error"></div>
+    </div>
+</div>
+
+<!-- ===== ADMIN APP ===== -->
+<div class="layout" id="admin-app" style="display:none">
     <aside>
         <div class="logo">
             <div class="logo-title">PE-<span>Fabrikation</span></div>
@@ -219,8 +284,13 @@
             <button class="nav-item" onclick="showView('team')" id="nav-team"><span class="nav-dot"></span> Team</button>
         </nav>
         <div class="sidebar-footer">
-            <div class="status-dot"></div>
-            <span class="status-text">Online</span>
+            <div style="display:flex;align-items:center;gap:8px">
+                <div class="status-dot"></div>
+                <span class="status-text">Admin</span>
+            </div>
+            <button class="logout-btn" onclick="doLogout()" title="Abmelden">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            </button>
         </div>
     </aside>
 
@@ -230,11 +300,14 @@
                 <div class="page-title" id="view-title">Dashboard</div>
                 <div class="page-date" id="current-date"></div>
             </div>
-            <div id="header-actions">
-                <button class="btn btn-primary" onclick="openOrderModal()">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>
-                    Neuer Auftrag
-                </button>
+            <div style="display:flex;align-items:center;gap:10px">
+                <span class="role-badge role-admin">Admin</span>
+                <div id="header-actions">
+                    <button class="btn btn-primary" onclick="openOrderModal()">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>
+                        Neuer Auftrag
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -247,12 +320,10 @@
                 <div class="stat-card"><div class="stat-label">Frist Kritisch</div><div class="stat-value stat-rose" id="stat-deadline">0</div></div>
                 <div class="stat-card"><div class="stat-label">Erledigt</div><div class="stat-value stat-slate" id="stat-done">0</div></div>
             </div>
-
             <div class="search-bar no-print">
                 <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 <input type="text" id="search-dashboard" placeholder="Auftrag suchen..." oninput="renderAll()">
             </div>
-
             <div class="bulk-bar no-print" id="bulk-bar">
                 <span class="bulk-count" id="bulk-count">0 ausgewählt</span>
                 <button class="bulk-btn bulk-btn-done" onclick="bulkMarkDone()">
@@ -265,7 +336,6 @@
                 </button>
                 <button class="bulk-btn bulk-btn-clear" onclick="clearSelection()">Abbrechen</button>
             </div>
-
             <div class="card">
                 <div class="folder-header">
                     <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-3);font-family:'DM Mono',monospace;">Alle Aufträge</div>
@@ -276,7 +346,7 @@
                         <thead>
                             <tr>
                                 <th><input type="checkbox" class="row-cb" id="select-all" onchange="toggleSelectAll(this.checked)"></th>
-                                <th>Objekt</th><th>Lieferdatum</th><th>Zeichner</th><th>Status</th>
+                                <th>Objekt</th><th>Lieferdatum</th><th>Zeichner</th><th>Flags</th><th>Status</th>
                                 <th style="text-align:right">Aktionen</th>
                             </tr>
                         </thead>
@@ -300,7 +370,7 @@
                 </div>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>Objekt</th><th>Lieferdatum</th><th>Zeichner</th><th style="text-align:right">Aktionen</th></tr></thead>
+                        <thead><tr><th>Objekt</th><th>Lieferdatum</th><th>Zeichner</th><th>Flags</th><th style="text-align:right">Aktionen</th></tr></thead>
                         <tbody id="druckbereit-body"></tbody>
                     </table>
                 </div>
@@ -321,7 +391,7 @@
                 </div>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>Objekt</th><th>Lieferdatum</th><th>Zeichner</th><th>Status</th><th style="text-align:right">Aktionen</th></tr></thead>
+                        <thead><tr><th>Objekt</th><th>Lieferdatum</th><th>Zeichner</th><th>Flags</th><th>Status</th><th style="text-align:right">Aktionen</th></tr></thead>
                         <tbody id="montage-body"></tbody>
                     </table>
                 </div>
@@ -356,6 +426,59 @@
     </main>
 </div>
 
+<!-- ===== ZEICHNER APP ===== -->
+<div id="zeichner-app" style="display:none">
+    <div class="layout">
+        <aside>
+            <div class="logo">
+                <div class="logo-title">PE-<span>Fabrikation</span></div>
+                <div class="logo-sub">Meine Aufträge</div>
+            </div>
+            <nav>
+                <button class="nav-item active" id="z-nav-dashboard"><span class="nav-dot"></span> Meine Aufträge</button>
+            </nav>
+            <div class="sidebar-footer">
+                <div style="display:flex;align-items:center;gap:8px">
+                    <div class="status-dot"></div>
+                    <span class="status-text" style="color:#7db89a">Kujtim</span>
+                </div>
+                <button class="logout-btn" onclick="doLogout()" title="Abmelden">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                </button>
+            </div>
+        </aside>
+        <main>
+            <div class="page-header no-print">
+                <div>
+                    <div class="page-title">Meine Aufträge</div>
+                    <div class="page-date" id="z-current-date"></div>
+                </div>
+                <span class="role-badge role-zeichner">Kujtim</span>
+            </div>
+            <div class="search-bar no-print">
+                <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="z-search" placeholder="Auftrag suchen..." oninput="renderZeichner()">
+            </div>
+            <div class="card">
+                <div class="folder-header">
+                    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-3);font-family:'DM Mono',monospace;">Zugewiesene Aufträge</div>
+                    <div class="folder-count" id="z-count">0 Aufträge</div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Objekt</th><th>Lieferdatum</th><th>Flags</th><th>PDFs</th><th style="text-align:right">Aktion</th>
+                            </tr>
+                        </thead>
+                        <tbody id="zeichner-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
 <!-- MODALS -->
 <div class="modal-overlay" id="modal-order">
     <div class="modal">
@@ -377,6 +500,24 @@
                 <div class="form-group">
                     <label class="form-label">Zeichner</label>
                     <select id="assignee" class="form-input"></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Auftrags-Flags</label>
+                <div class="flags-row">
+                    <!-- Order: 1. Unterlagen 2. Ausmass 3. GZA 4. Angepasst -->
+                    <label class="flag-check unterlagen">
+                        <input type="checkbox" id="flag-unterlagen"> Unterlagen erhalten
+                    </label>
+                    <label class="flag-check ausmass">
+                        <input type="checkbox" id="flag-ausmass"> Ausmass erhalten
+                    </label>
+                    <label class="flag-check gza">
+                        <input type="checkbox" id="flag-gza"> GZA
+                    </label>
+                    <label class="flag-check angepasst">
+                        <input type="checkbox" id="flag-angepasst"> Angepasst
+                    </label>
                 </div>
             </div>
             <div class="form-group">
@@ -444,16 +585,63 @@
     </div>
 </div>
 
+<!-- PDF UPLOAD MODAL -->
+<div class="modal-overlay" id="modal-pdf">
+    <div class="modal" style="max-width:400px">
+        <div class="modal-header">
+            <div class="modal-title">PDF hochladen</div>
+            <button class="modal-close" onclick="closeModal('modal-pdf')"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="pdf-order-id">
+            <div style="border: 2px dashed var(--border-strong); border-radius: var(--radius); padding: 30px; text-align:center; cursor:pointer;" onclick="document.getElementById('pdf-file-input').click()">
+                <div style="font-size:28px;margin-bottom:8px">📄</div>
+                <div style="font-size:13px;font-weight:600;color:var(--text-2)">PDF auswählen</div>
+                <div style="font-size:11px;color:var(--text-3);margin-top:4px">Grosse Dateien werden automatisch aufgeteilt</div>
+            </div>
+            <input type="file" id="pdf-file-input" accept=".pdf" style="display:none" onchange="startPdfUpload(this)">
+            <div id="pdf-upload-progress" style="margin-top:12px;display:none">
+                <div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:6px" id="pdf-progress-text">Vorbereitung...</div>
+                <div style="height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden">
+                    <div id="pdf-progress-bar" style="height:100%;background:var(--accent);border-radius:3px;width:0%;transition:width 0.3s"></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal('modal-pdf')">Schliessen</button>
+        </div>
+    </div>
+</div>
+
+<!-- KUJTIM ERLEDIGEN CONFIRM MODAL -->
+<div class="modal-overlay" id="modal-erledigen">
+    <div class="modal" style="max-width:380px">
+        <div class="modal-body" style="padding-top:28px;text-align:center;">
+            <div style="font-size:32px;margin-bottom:12px;">✅</div>
+            <div style="font-size:16px;font-weight:700;margin-bottom:8px;">Auftrag erledigen?</div>
+            <div style="font-size:13px;color:var(--text-2);line-height:1.6;" id="erledigen-modal-msg"></div>
+            <div style="margin-top:12px;padding:10px 14px;background:var(--rose-light);border:1px solid #f0c8c8;border-radius:var(--radius);font-size:12px;color:var(--rose);font-weight:600;">
+                ⚠️ Alle hochgeladenen PDFs werden dabei automatisch gelöscht.
+            </div>
+        </div>
+        <div class="modal-footer" style="margin-top:8px;">
+            <button class="btn btn-ghost" onclick="closeModal('modal-erledigen')">Abbrechen</button>
+            <button class="btn btn-primary" id="erledigen-confirm-btn">Erledigen</button>
+        </div>
+    </div>
+</div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, onSnapshot, doc, getDoc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBrpOIH2U5Egl5yiVX4RM2I9XI5kUU1UCw",
         authDomain: "gzaa-d38df.firebaseapp.com",
         projectId: "gzaa-d38df",
-        storageBucket: "gzaa-d38df.firebasestorage.app",
+        storageBucket: "gzaa-d38df.appspot.com",
         messagingSenderId: "209638536455",
         appId: "1:209638536455:web:14e79e810dfe6cc65e81a2"
     };
@@ -461,50 +649,103 @@
     const fbApp = initializeApp(firebaseConfig);
     const db = getFirestore(fbApp);
     const auth = getAuth(fbApp);
+    const storage = getStorage(fbApp);
     const appId = 'gzaa-d38df';
     const ordersCol = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
-    const teamCol = collection(db, 'artifacts', appId, 'public', 'data', 'team');
+    const teamCol   = collection(db, 'artifacts', appId, 'public', 'data', 'team');
 
+    const CHUNK_SIZE = 500 * 1024;
+
+    let currentRole = null;
     let user = null, orders = [], team = [];
     let selectedIds = new Set();
 
-    // INIT
-    document.getElementById('current-date').innerText = new Date().toLocaleDateString('de-DE', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+    // ===== LOGIN =====
+    window.doLogin = () => {
+        const code = document.getElementById('login-code').value.trim();
+        if (code === '3166') {
+            currentRole = 'admin';
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('admin-app').style.display = 'flex';
+            initDates();
+            initFirebase();
+        } else if (code === '8853') {
+            currentRole = 'zeichner';
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('zeichner-app').style.display = 'block';
+            document.getElementById('z-current-date').innerText = new Date().toLocaleDateString('de-DE', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+            initFirebase();
+        } else {
+            document.getElementById('login-error').textContent = 'Ungültiger Code. Bitte erneut versuchen.';
+            document.getElementById('login-code').value = '';
+        }
+    };
+
+    document.getElementById('login-code').addEventListener('keydown', e => {
+        if (e.key === 'Enter') window.doLogin();
+    });
+
+    window.doLogout = () => {
+        currentRole = null;
+        document.getElementById('admin-app').style.display = 'none';
+        document.getElementById('zeichner-app').style.display = 'none';
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('login-code').value = '';
+        document.getElementById('login-error').textContent = '';
+    };
+
+    const initDates = () => {
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString('de-DE', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+    };
 
     document.getElementById('is_done').addEventListener('change', function() {
         document.getElementById('erledigt-toggle-wrap').classList.toggle('on', this.checked);
     });
 
-    signInAnonymously(auth);
-    onAuthStateChanged(auth, u => {
-        user = u;
-        if (user) {
-            onSnapshot(ordersCol, snap => {
-                orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderAll();
-            });
-            onSnapshot(teamCol, snap => {
-                team = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderTeam();
-                updateAssigneeDropdown();
-            });
-        }
-    });
+    const initFirebase = () => {
+        signInAnonymously(auth);
+        onAuthStateChanged(auth, u => {
+            user = u;
+            if (user) {
+                onSnapshot(ordersCol, snap => {
+                    orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    if (currentRole === 'admin') renderAll();
+                    else renderZeichner();
+                });
+                onSnapshot(teamCol, snap => {
+                    team = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    if (currentRole === 'admin') { renderTeam(); updateAssigneeDropdown(); }
+                });
+            }
+        });
+    };
 
-    // HELPERS
-    // "active" = not done AND not legacy-archived → appears in Dashboard
-    const isActive   = o => !o.is_done && !o.archived;
-    // "montage"  = is_montage=true, regardless of is_done → stays in Montage folder always
-    const isMontage  = o => o.is_montage === true && !o.archived;
-    const isDone     = o => !!o.is_done;
-
-    const q = id => (document.getElementById(id)?.value || '').toLowerCase().trim();
-    const matches = (o, term) => !term || o.objekt.toLowerCase().includes(term) || (o.assignee||'').toLowerCase().includes(term);
-
+    // ===== HELPERS =====
+    const isActive  = o => !o.is_done && !o.archived;
+    const isMontage = o => o.is_montage === true && !o.archived;
+    const isDone    = o => !!o.is_done;
+    const q         = id => (document.getElementById(id)?.value || '').toLowerCase().trim();
+    const matches   = (o, term) => !term || o.objekt.toLowerCase().includes(term) || (o.assignee||'').toLowerCase().includes(term);
     const daysUntil = s => { if (!s) return 999; const t=new Date(); t.setHours(0,0,0,0); const d=new Date(s); d.setHours(0,0,0,0); return Math.round((d-t)/86400000); };
     const formatDate = s => s ? new Date(s).toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
     const sortByDelivery = l => [...l].sort((a,b) => new Date(a.date_delivery)-new Date(b.date_delivery));
     const deadlineClass = s => { const d=daysUntil(s); return d<0?'deadline-crit':d<=5?'deadline-warn':'deadline-ok'; };
+
+    const flagsHtml = o => {
+        let h = '<div class="flags-cell">';
+        // Order: 1. Unterlagen 2. Ausmass 3. GZA 4. Angepasst
+        if (o.flag_unterlagen) h += '<span class="flag-chip flag-unterlagen">UNTERLAGEN</span>';
+        if (o.flag_ausmass)    h += '<span class="flag-chip flag-ausmass">AUSMASS</span>';
+        if (o.flag_gza)        h += '<span class="flag-chip flag-gza">GZA</span>';
+        if (o.flag_angepasst)  h += '<span class="flag-chip flag-angepasst">ANGEPASST</span>';
+        h += '</div>';
+        return h;
+    };
+
+    const assigneeHtml = o => {
+        const isK = (o.assignee||'').toLowerCase() === 'kujtim';
+        return `<span style="font-size:12px;${isK?'color:var(--kujtim);font-weight:700':'color:var(--text-2)'}">${o.assignee||'—'}</span>`;
+    };
 
     const statusBadge = o => {
         if (isDone(o)) return `<span class="badge badge-done"><span class="dot dot-slate"></span>Erledigt</span>`;
@@ -514,45 +755,173 @@
         return `<span class="badge badge-pending">Offen</span>`;
     };
 
-    // RENDER ALL — single source of truth
+    // ===== PDF MANAGEMENT =====
+    window.openPdfModal = (orderId) => {
+        document.getElementById('pdf-order-id').value = orderId;
+        document.getElementById('pdf-upload-progress').style.display = 'none';
+        document.getElementById('pdf-file-input').value = '';
+        document.getElementById('modal-pdf').classList.add('open');
+    };
+
+    window.startPdfUpload = async (input) => {
+        const file = input.files[0];
+        if (!file || !user) return;
+        const orderId = document.getElementById('pdf-order-id').value;
+        if (!orderId) return;
+
+        const progressDiv = document.getElementById('pdf-upload-progress');
+        const progressText = document.getElementById('pdf-progress-text');
+        const progressBar = document.getElementById('pdf-progress-bar');
+        progressDiv.style.display = 'block';
+
+        const fileName = file.name;
+        const fileKey = `pdf_${Date.now()}`;
+        const totalSize = file.size;
+        const totalChunks = Math.ceil(totalSize / CHUNK_SIZE);
+
+        progressText.textContent = `Lesen... (${(totalSize/1024/1024).toFixed(1)} MB)`;
+
+        const base64Full = await new Promise((res, rej) => {
+            const r = new FileReader();
+            r.onload = () => res(r.result.split(',')[1]);
+            r.onerror = rej;
+            r.readAsDataURL(file);
+        });
+
+        progressText.textContent = `Hochladen... 0 / ${totalChunks} Teile`;
+        const chunkSize64 = Math.ceil((CHUNK_SIZE * 4 / 3) + 4);
+
+        for (let i = 0; i < totalChunks; i++) {
+            const start = i * chunkSize64;
+            const chunk = base64Full.substring(start, start + chunkSize64);
+            const chunkDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'pdfchunks', `${orderId}_${fileKey}_${i}`);
+            const pct = Math.round((i + 1) / totalChunks * 100);
+            progressText.textContent = `Hochladen... ${i+1} / ${totalChunks} Teile`;
+            progressBar.style.width = pct + '%';
+            await setDoc(chunkDocRef, { chunk, orderId, fileKey, index: i, total: totalChunks });
+        }
+
+        const o = orders.find(x => x.id === orderId);
+        const existingPdfs = o?.pdfs || [];
+        await updateDoc(doc(ordersCol, orderId), {
+            pdfs: [...existingPdfs, { name: fileName, key: fileKey, chunks: totalChunks, size: totalSize }]
+        });
+
+        progressText.textContent = `✅ Hochgeladen: ${fileName}`;
+        progressBar.style.width = '100%';
+        setTimeout(() => closeModal('modal-pdf'), 1500);
+    };
+
+    window.downloadPdf = async (orderId, fileKey, fileName, totalChunks) => {
+        const btn = event.currentTarget;
+        btn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M12 2v20M2 12l10 10 10-10"/></svg>`;
+        btn.style.opacity = '0.5';
+
+        let base64Full = '';
+        for (let i = 0; i < totalChunks; i++) {
+            const chunkDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'pdfchunks', `${orderId}_${fileKey}_${i}`);
+            const snap = await getDoc(chunkDocRef);
+            if (snap.exists()) base64Full += snap.data().chunk;
+        }
+
+        const byteChars = atob(base64Full);
+        const bytes = new Uint8Array(byteChars.length);
+        for (let i = 0; i < byteChars.length; i++) bytes[i] = byteChars.charCodeAt(i);
+        const blob = new Blob([bytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = fileName; a.click();
+        URL.revokeObjectURL(url);
+        btn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>`;
+        btn.style.opacity = '1';
+    };
+
+    window.deletePdf = async (orderId, fileKey, fileName, totalChunks) => {
+        if (!confirm(`"${fileName}" wirklich löschen?`)) return;
+        await deletePdfChunks(orderId, fileKey, totalChunks);
+        const o = orders.find(x => x.id === orderId);
+        const newPdfs = (o?.pdfs || []).filter(p => p.key !== fileKey);
+        await updateDoc(doc(ordersCol, orderId), { pdfs: newPdfs });
+    };
+
+    // Helper: delete all PDF chunks for a given order+fileKey
+    const deletePdfChunks = async (orderId, fileKey, totalChunks) => {
+        for (let i = 0; i < totalChunks; i++) {
+            const chunkDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'pdfchunks', `${orderId}_${fileKey}_${i}`);
+            await deleteDoc(chunkDocRef).catch(() => {});
+        }
+    };
+
+    // Delete ALL PDFs for an order
+    const deleteAllPdfsForOrder = async (orderId) => {
+        const o = orders.find(x => x.id === orderId);
+        const pdfs = o?.pdfs || [];
+        for (const p of pdfs) {
+            await deletePdfChunks(orderId, p.key, p.chunks);
+        }
+        if (pdfs.length > 0) {
+            await updateDoc(doc(ordersCol, orderId), { pdfs: [] });
+        }
+    };
+
+    const renderPdfs = (o, adminMode = true) => {
+        const pdfs = o.pdfs || [];
+        let h = '<div class="pdf-section">';
+        if (pdfs.length) {
+            h += '<div class="pdf-list">';
+            pdfs.forEach(p => {
+                h += `<div class="pdf-item">
+                    <span style="font-size:13px">📄</span>
+                    <span class="pdf-name" title="${p.name}">${p.name}</span>
+                    <button class="pdf-btn pdf-download" title="Herunterladen"
+                        onclick="downloadPdf('${o.id}','${p.key}','${p.name.replace(/'/g,"\\'")}',${p.chunks})">
+                        <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                    </button>
+                    ${adminMode ? `<button class="pdf-btn pdf-delete" title="Löschen"
+                        onclick="deletePdf('${o.id}','${p.key}','${p.name.replace(/'/g,"\\'")}',${p.chunks})">
+                        <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M3 6h18M8 6V4h8v2M19 6l-1 14H8L6 6"/></svg>
+                    </button>` : ''}
+                </div>`;
+            });
+            h += '</div>';
+        }
+        if (adminMode) {
+            h += `<button class="pdf-upload-btn" onclick="openPdfModal('${o.id}')">
+                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 5v14M5 12h14"/></svg>
+                PDF hochladen
+            </button>`;
+        }
+        h += '</div>';
+        return h;
+    };
+
+    // ===== RENDER ALL =====
     window.renderAll = () => {
         const active  = orders.filter(isActive);
-        const montage = orders.filter(isMontage);   // all montage incl. done ones
+        const montage = orders.filter(isMontage);
         const done    = orders.filter(isDone);
-
-        // Dashboard (only truly active = not done)
         const dTerm = q('search-dashboard');
         renderDashboard(active.filter(o => matches(o, dTerm)));
-
-        // Druckbereit — active only
         const pTerm = q('search-druckbereit');
         renderFolder('druckbereit-body', 'print-count', active.filter(o => o.is_druckbereit === true && matches(o, pTerm)));
-
-        // Montage — ALL montage orders (including done), sorted by delivery
         const mTerm = q('search-montage');
         renderMontageFolder(montage.filter(o => matches(o, mTerm)));
-
-        // Erledigt — global done list (non-montage ones, or all — user can see both)
         const eTerm = q('search-erledigt');
         renderErledigt(done.filter(o => matches(o, eTerm)));
-
-        // Stats (unfiltered)
         document.getElementById('stat-total').textContent    = active.length;
         document.getElementById('stat-print').textContent    = active.filter(o => o.is_druckbereit === true).length;
         document.getElementById('stat-montage').textContent  = montage.length;
         document.getElementById('stat-deadline').textContent = active.filter(o => daysUntil(o.date_delivery) <= 5).length;
         document.getElementById('stat-done').textContent     = done.length;
-
         updateBulkBar();
     };
 
-    // DASHBOARD TABLE
     const renderDashboard = (list) => {
         const body = document.getElementById('dashboard-body');
         body.innerHTML = '';
         document.getElementById('dash-count').textContent = `${list.length} Einträge`;
         if (!list.length) {
-            body.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Keine Aufträge</div><div class="empty-sub">Füge einen neuen Auftrag hinzu</div></div></td></tr>`;
+            body.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Keine Aufträge</div><div class="empty-sub">Füge einen neuen Auftrag hinzu</div></div></td></tr>`;
             return;
         }
         sortByDelivery(list).forEach(o => {
@@ -562,12 +931,16 @@
             if (sel) tr.classList.add('row-selected');
             tr.innerHTML = `
                 <td><input type="checkbox" class="row-cb" ${sel?'checked':''} onchange="window._toggleRow('${o.id}',this.checked)"></td>
-                <td><div class="object-name">${o.objekt}</div></td>
+                <td>
+                    <div class="object-name">${o.objekt}</div>
+                    ${renderPdfs(o, true)}
+                </td>
                 <td>
                     <span class="deadline-chip ${deadlineClass(o.date_delivery)}">${formatDate(o.date_delivery)}</span>
                     ${days>=0&&days<=7?`<span style="margin-left:6px;font-size:10px;color:var(--rose);font-family:'DM Mono',monospace;font-weight:600;">in ${days}T</span>`:''}
                 </td>
-                <td><span style="font-size:12px;color:var(--text-2)">${o.assignee||'—'}</span></td>
+                <td>${assigneeHtml(o)}</td>
+                <td>${flagsHtml(o)}</td>
                 <td>${statusBadge(o)}</td>
                 <td>
                     <div class="actions-cell">
@@ -590,7 +963,6 @@
                 </td>`;
             body.appendChild(tr);
         });
-
         const allActive = orders.filter(isActive);
         const allIds = allActive.map(o => o.id);
         const allSel = allIds.length > 0 && allIds.every(id => selectedIds.has(id));
@@ -600,21 +972,21 @@
         sa.indeterminate = !allSel && someSel;
     };
 
-    // FOLDER TABLE (Druckbereit only)
     const renderFolder = (bodyId, countId, list) => {
         document.getElementById(countId).textContent = `${list.length} Aufträge`;
         const body = document.getElementById(bodyId);
         body.innerHTML = '';
         if (!list.length) {
-            body.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Noch keine Einträge</div><div class="empty-sub">Sobald Aufträge markiert werden, erscheinen sie hier</div></div></td></tr>`;
+            body.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">Noch keine Einträge</div></div></td></tr>`;
             return;
         }
         sortByDelivery(list).forEach(o => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><div class="object-name">${o.objekt}</div></td>
+                <td><div class="object-name">${o.objekt}</div>${renderPdfs(o, true)}</td>
                 <td><span class="deadline-chip ${deadlineClass(o.date_delivery)}">${formatDate(o.date_delivery)}</span></td>
-                <td><span style="font-size:12px;color:var(--text-2)">${o.assignee||'—'}</span></td>
+                <td>${assigneeHtml(o)}</td>
+                <td>${flagsHtml(o)}</td>
                 <td><div class="actions-cell">
                     <button class="action-btn" title="Bearbeiten" onclick="window.openEditModal('${o.id}')">
                         <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z"/></svg>
@@ -624,34 +996,27 @@
         });
     };
 
-    // MONTAGE FOLDER — stays even when done, has per-row Erledigt toggle
     const renderMontageFolder = (list) => {
         document.getElementById('montage-count').textContent = `${list.length} Aufträge`;
         const body = document.getElementById('montage-body');
         body.innerHTML = '';
         if (!list.length) {
-            body.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">🔧</div><div class="empty-title">Noch keine Einträge</div><div class="empty-sub">Sobald Aufträge als "Inkl. Montage" markiert werden, erscheinen sie hier</div></div></td></tr>`;
+            body.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">🔧</div><div class="empty-title">Noch keine Einträge</div></div></td></tr>`;
             return;
         }
-        // Open first, then done — each group sorted by delivery
         const open = sortByDelivery(list.filter(o => !isDone(o)));
         const done = sortByDelivery(list.filter(o => isDone(o)));
         [...open, ...done].forEach(o => {
             const d = isDone(o);
             const tr = document.createElement('tr');
-            // no visual dimming in montage folder
             tr.innerHTML = `
-                <td><div class="object-name">${o.objekt}</div></td>
+                <td><div class="object-name">${o.objekt}</div>${renderPdfs(o, true)}</td>
                 <td><span class="deadline-chip ${deadlineClass(o.date_delivery)}">${formatDate(o.date_delivery)}</span></td>
-                <td><span style="font-size:12px;color:var(--text-2)">${o.assignee||'—'}</span></td>
-                <td>${d
-                    ? `<span class="badge badge-done"><span class="dot dot-slate"></span>Erledigt</span>`
-                    : `<span class="badge badge-montage"><span class="dot dot-emerald"></span>Offen</span>`
-                }</td>
+                <td>${assigneeHtml(o)}</td>
+                <td>${flagsHtml(o)}</td>
+                <td>${d ? `<span class="badge badge-done"><span class="dot dot-slate"></span>Erledigt</span>` : `<span class="badge badge-montage"><span class="dot dot-emerald"></span>Offen</span>`}</td>
                 <td><div class="actions-cell">
-                    <button class="action-btn ${d ? 'active-done' : ''}"
-                        title="${d ? 'Als offen markieren' : 'Als erledigt markieren'}"
-                        onclick="window._statusModal('${o.id}','done')">
+                    <button class="action-btn ${d?'active-done':''}" title="${d?'Als offen markieren':'Als erledigt markieren'}" onclick="window._statusModal('${o.id}','done')">
                         <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                     </button>
                     <button class="action-btn" title="Bearbeiten" onclick="window.openEditModal('${o.id}')">
@@ -662,13 +1027,12 @@
         });
     };
 
-    // ERLEDIGT TABLE
     const renderErledigt = (list) => {
         document.getElementById('erledigt-count').textContent = `${list.length} Aufträge`;
         const body = document.getElementById('erledigt-body');
         body.innerHTML = '';
         if (!list.length) {
-            body.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">✅</div><div class="empty-title">Noch nichts erledigt</div><div class="empty-sub">Abgeschlossene Aufträge erscheinen hier</div></div></td></tr>`;
+            body.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">✅</div><div class="empty-title">Noch nichts erledigt</div></div></td></tr>`;
             return;
         }
         [...list].sort((a,b) => new Date(b.done_at||0)-new Date(a.done_at||0)).forEach(o => {
@@ -676,7 +1040,7 @@
             tr.innerHTML = `
                 <td><div class="object-name">${o.objekt}</div></td>
                 <td><span style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text-3)">${o.done_at?formatDate(o.done_at):'—'}</span></td>
-                <td><span style="font-size:12px;color:var(--text-2)">${o.assignee||'—'}</span></td>
+                <td>${assigneeHtml(o)}</td>
                 <td><div class="actions-cell">
                     <button class="btn btn-ghost" style="padding:4px 12px;font-size:11px;" onclick="window._restoreOrder('${o.id}')">Wiederherstellen</button>
                     <button class="action-btn danger" title="Löschen" onclick="window._deleteModal(['${o.id}'])">
@@ -687,17 +1051,73 @@
         });
     };
 
-    // TEAM
+    // ===== ZEICHNER VIEW =====
+    window.renderZeichner = () => {
+        const term = q('z-search');
+        // Show only active (not done) orders for Kujtim
+        const myOrders = orders.filter(o => (o.assignee||'').toLowerCase() === 'kujtim' && !o.archived && !o.is_done && matches(o, term));
+        document.getElementById('z-count').textContent = `${myOrders.length} Aufträge`;
+        const body = document.getElementById('zeichner-body');
+        body.innerHTML = '';
+        if (!myOrders.length) {
+            body.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Keine Aufträge zugewiesen</div><div class="empty-sub">Der Admin muss Aufträge "Kujtim" zuweisen</div></div></td></tr>`;
+            return;
+        }
+        sortByDelivery(myOrders).forEach(o => {
+            const days = daysUntil(o.date_delivery);
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>
+                    <div class="object-name">${o.objekt}</div>
+                </td>
+                <td>
+                    <span class="deadline-chip ${deadlineClass(o.date_delivery)}">${formatDate(o.date_delivery)}</span>
+                    ${days>=0&&days<=7?`<span style="margin-left:6px;font-size:10px;color:var(--rose);font-family:'DM Mono',monospace;font-weight:600;">in ${days}T</span>`:''}
+                </td>
+                <td>${flagsHtml(o)}</td>
+                <td>${renderPdfs(o, false)}</td>
+                <td>
+                    <div class="actions-cell">
+                        <button class="btn-erledigen" onclick="window._kujtimErledigen('${o.id}','${o.objekt.replace(/'/g,"\\'")}')">
+                            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            Erledigen
+                        </button>
+                    </div>
+                </td>`;
+            body.appendChild(tr);
+        });
+    };
+
+    // Kujtim marks order as done + auto-deletes all PDFs
+    window._kujtimErledigen = (orderId, objektName) => {
+        document.getElementById('erledigen-modal-msg').innerHTML =
+            `Möchtest du den Auftrag <strong>"${objektName}"</strong> als erledigt markieren?`;
+        document.getElementById('erledigen-confirm-btn').onclick = async () => {
+            if (!user) return;
+            // Delete all PDFs first
+            await deleteAllPdfsForOrder(orderId);
+            // Mark as done
+            await updateDoc(doc(ordersCol, orderId), {
+                is_done: true,
+                done_at: new Date().toISOString()
+            });
+            closeModal('modal-erledigen');
+        };
+        document.getElementById('modal-erledigen').classList.add('open');
+    };
+
+    // ===== TEAM =====
     const renderTeam = () => {
         const c = document.getElementById('team-list'); c.innerHTML = '';
-        if (!team.length) { c.innerHTML = `<div style="grid-column:1/-1"><div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Kein Team</div><div class="empty-sub">Füge Teammitglieder hinzu</div></div></div>`; return; }
+        if (!team.length) { c.innerHTML = `<div style="grid-column:1/-1"><div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Kein Team</div></div></div>`; return; }
         team.forEach(m => {
             const count = orders.filter(o => o.assignee===m.name && isActive(o)).length;
+            const isK = m.name.toLowerCase() === 'kujtim';
             const d = document.createElement('div'); d.className = 'team-card';
             d.innerHTML = `
                 <button class="team-remove" onclick="window._deleteTeam('${m.id}')"><svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg></button>
-                <div class="team-avatar">${m.name.charAt(0).toUpperCase()}</div>
-                <div class="team-name">${m.name}</div>
+                <div class="team-avatar" style="${isK?'background:#dcfce7;color:var(--kujtim)':''}">${m.name.charAt(0).toUpperCase()}</div>
+                <div class="team-name" style="${isK?'color:var(--kujtim)':''}">${m.name}${isK?' ✦':''}</div>
                 <div class="team-count">${count} Aktive</div>`;
             c.appendChild(d);
         });
@@ -706,11 +1126,16 @@
     const updateAssigneeDropdown = () => {
         const sel = document.getElementById('assignee'); const cur = sel.value;
         sel.innerHTML = '<option value="">— Nicht zugewiesen —</option>';
-        team.forEach(m => sel.innerHTML += `<option value="${m.name}">${m.name}</option>`);
+        team.forEach(m => {
+            const isK = m.name.toLowerCase() === 'kujtim';
+            sel.innerHTML += `<option value="${m.name}" style="${isK?'color:var(--kujtim);font-weight:700':''}">
+                ${m.name}${isK?' ✦':''}
+            </option>`;
+        });
         sel.value = cur;
     };
 
-    // SELECTION
+    // ===== SELECTION =====
     window._toggleRow = (id, checked) => {
         if (checked) selectedIds.add(id); else selectedIds.delete(id);
         updateBulkBar();
@@ -722,19 +1147,16 @@
         renderDashboard(orders.filter(isActive).filter(o => matches(o, q('search-dashboard'))));
     };
     window.clearSelection = () => { selectedIds.clear(); renderAll(); };
-
     const updateBulkBar = () => {
         const n = selectedIds.size;
         document.getElementById('bulk-bar').classList.toggle('visible', n > 0);
         document.getElementById('bulk-count').textContent = `${n} ausgewählt`;
     };
-
     window.bulkDelete = () => { window._deleteModal([...selectedIds], () => selectedIds.clear()); };
-
     window.bulkMarkDone = () => {
         const ids = [...selectedIds]; if (!ids.length) return;
         document.getElementById('status-modal-title').textContent = `${ids.length} Aufträge erledigen`;
-        document.getElementById('status-modal-msg').innerHTML = `Möchtest du <strong>${ids.length} Aufträge</strong> als erledigt markieren?<br><span style="color:var(--text-3);font-size:12px;">Sie verschwinden aus dem Dashboard.</span>`;
+        document.getElementById('status-modal-msg').innerHTML = `Möchtest du <strong>${ids.length} Aufträge</strong> als erledigt markieren?`;
         const btn = document.getElementById('status-confirm-btn');
         btn.textContent = 'Als erledigt markieren'; btn.className = 'btn btn-primary';
         btn.onclick = async () => {
@@ -747,12 +1169,16 @@
         document.getElementById('modal-status-confirm').classList.add('open');
     };
 
-    // ORDER MODAL
+    // ===== ORDER MODAL =====
     window.openOrderModal = () => {
         document.getElementById('edit-id').value = '';
         document.getElementById('objekt').value = '';
         document.getElementById('date_delivery').value = '';
         document.getElementById('assignee').value = '';
+        document.getElementById('flag-gza').checked = false;
+        document.getElementById('flag-angepasst').checked = false;
+        document.getElementById('flag-ausmass').checked = false;
+        document.getElementById('flag-unterlagen').checked = false;
         document.getElementById('is_done').checked = false;
         document.getElementById('erledigt-toggle-wrap').classList.remove('on');
         document.getElementById('order-modal-title').textContent = 'Neuer Auftrag';
@@ -765,6 +1191,10 @@
         document.getElementById('objekt').value = o.objekt;
         document.getElementById('date_delivery').value = o.date_delivery;
         document.getElementById('assignee').value = o.assignee || '';
+        document.getElementById('flag-gza').checked = !!o.flag_gza;
+        document.getElementById('flag-angepasst').checked = !!(o.flag_angepasst || o.flag_anpassen); // backwards compat
+        document.getElementById('flag-ausmass').checked = !!o.flag_ausmass;
+        document.getElementById('flag-unterlagen').checked = !!o.flag_unterlagen;
         const done = !!o.is_done;
         document.getElementById('is_done').checked = done;
         document.getElementById('erledigt-toggle-wrap').classList.toggle('on', done);
@@ -784,34 +1214,33 @@
             objekt: name,
             date_delivery: delivery,
             assignee: assignee || null,
-            // Preserve existing status flags, don't overwrite them
             is_druckbereit: ex ? (ex.is_druckbereit === true) : false,
-            is_montage:     ex ? (ex.is_montage     === true) : false,
-            is_done:        isDoneVal,
-            done_at:        isDoneVal ? (ex?.done_at || new Date().toISOString()) : null,
-            archived:       false,   // reset legacy field
-            created_at:     ex?.created_at || new Date().toISOString()
+            is_montage:     ex ? (ex.is_montage === true) : false,
+            is_done: isDoneVal,
+            done_at: isDoneVal ? (ex?.done_at || new Date().toISOString()) : null,
+            archived: false,
+            created_at: ex?.created_at || new Date().toISOString(),
+            flag_gza:        document.getElementById('flag-gza').checked,
+            flag_angepasst:  document.getElementById('flag-angepasst').checked,
+            flag_ausmass:    document.getElementById('flag-ausmass').checked,
+            flag_unterlagen: document.getElementById('flag-unterlagen').checked,
         };
         if (id) await updateDoc(doc(ordersCol, id), data);
         else    await addDoc(ordersCol, data);
         closeModal('modal-order');
     };
 
-    // STATUS MODAL — single confirm before write
     window._statusModal = (orderId, type) => {
         const o = orders.find(x => x.id === orderId); if (!o) return;
         const fieldMap = { druckbereit: 'is_druckbereit', montage: 'is_montage', done: 'is_done' };
         const labelMap = { druckbereit: 'Druckbereit', montage: 'Inkl. Montage', done: 'Erledigt' };
         const field = fieldMap[type];
         const label = labelMap[type];
-        const newVal = !(o[field] === true);  // strict check
-
+        const newVal = !(o[field] === true);
         document.getElementById('status-modal-title').textContent = 'Status bestätigen';
         document.getElementById('status-modal-msg').innerHTML =
             `Möchtest du <strong>"${o.objekt}"</strong> als <strong>${label}</strong> ${newVal ? 'markieren' : 'entfernen'}?` +
-            (newVal && type === 'done' ? `<br><span style="color:var(--text-3);font-size:12px;margin-top:4px;display:block;">Der Auftrag verschwindet aus dem Dashboard.</span>` : '') +
-            (newVal && type !== 'done' ? `<br><span style="color:var(--text-3);font-size:12px;margin-top:4px;display:block;">Der Auftrag erscheint im Ordner "${label}".</span>` : '');
-
+            (newVal && type === 'done' ? `<br><span style="color:var(--text-3);font-size:12px;">Der Auftrag verschwindet aus dem Dashboard.</span>` : '');
         const btn = document.getElementById('status-confirm-btn');
         btn.textContent = newVal ? `Als ${label} markieren` : `${label} entfernen`;
         btn.className = `btn ${newVal ? 'btn-primary' : 'btn-danger'}`;
@@ -825,13 +1254,10 @@
         document.getElementById('modal-status-confirm').classList.add('open');
     };
 
-    // DELETE
     window._deleteModal = (ids, afterFn) => {
         const n = ids.length;
         document.getElementById('delete-modal-title').textContent = n > 1 ? `${n} Aufträge löschen?` : 'Auftrag löschen?';
-        document.getElementById('delete-modal-msg').textContent = n > 1
-            ? `Diese ${n} Aufträge werden unwiderruflich gelöscht.`
-            : 'Dieser Auftrag wird unwiderruflich gelöscht.';
+        document.getElementById('delete-modal-msg').textContent = n > 1 ? `Diese ${n} Aufträge werden unwiderruflich gelöscht.` : 'Dieser Auftrag wird unwiderruflich gelöscht.';
         document.getElementById('delete-confirm-btn').onclick = async () => {
             if (!user) return;
             for (const id of ids) await deleteDoc(doc(ordersCol, id));
@@ -852,7 +1278,6 @@
         if (user) await updateDoc(doc(ordersCol, id), { is_done: false, done_at: null });
     };
 
-    // TEAM ADD
     window.addTeamMember = async () => {
         const name = document.getElementById('team-name').value.trim();
         if (!name || !user) return;
@@ -861,7 +1286,7 @@
         closeModal('modal-team');
     };
 
-    // VIEWS
+    // ===== VIEWS =====
     const ALL_VIEWS = ['dashboard','druckbereit','montage','erledigt','team'];
     window.showView = (v) => {
         ALL_VIEWS.forEach(x => {
