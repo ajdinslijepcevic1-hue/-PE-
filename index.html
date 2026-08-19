@@ -51,6 +51,27 @@
         .login-btn:hover { background: #243d32; }
         .login-error { color: var(--rose); font-size: 12px; margin-top: 10px; min-height: 18px; }
 
+        /* ===== GATE (Zugangscode Stufe 1) ===== */
+        #gate-screen {
+            position: fixed; inset: 0; background: var(--text);
+            display: flex; align-items: center; justify-content: center; z-index: 1000;
+        }
+        .gate-box {
+            background: var(--surface); border-radius: var(--radius-lg);
+            padding: 40px 36px; width: 340px; text-align: center;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+        }
+        .gate-dots { display: flex; justify-content: center; gap: 12px; margin: 20px 0; }
+        .gate-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--accent); transition: all 0.15s; }
+        .gate-dot.filled { background: var(--accent); transform: scale(1.1); }
+        .gate-status { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; min-height: 16px; margin-top: 4px; }
+        .gate-status.err { color: var(--rose); }
+        .gate-status.ok { color: var(--kujtim); }
+        .gate-pad { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 20px; }
+        .gate-key { padding: 16px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface-2); font-size: 18px; font-weight: 700; cursor: pointer; transition: all 0.1s; }
+        .gate-key:active { transform: scale(0.95); background: var(--accent-light); }
+        .gate-key.wide { grid-column: span 1; }
+
         /* ===== APP LAYOUT ===== */
         .layout { display: flex; min-height: 100vh; }
         aside { width: var(--sidebar-w); position: fixed; inset: 0 auto 0 0; background: var(--text); display: flex; flex-direction: column; padding: 28px 16px; z-index: 50; }
@@ -295,8 +316,34 @@
 </head>
 <body>
 
+<!-- ===== ZUGANGSCODE (GATE) ===== -->
+<div id="gate-screen">
+    <div class="gate-box">
+        <div class="login-logo">PE-<span>Fabrikation</span></div>
+        <div class="login-sub">Zugangscode</div>
+        <div class="gate-dots" id="gate-dots">
+            <div class="gate-dot"></div><div class="gate-dot"></div><div class="gate-dot"></div><div class="gate-dot"></div>
+        </div>
+        <div class="gate-status" id="gate-status">&nbsp;</div>
+        <div class="gate-pad" id="gate-pad">
+            <button class="gate-key" data-k="1">1</button>
+            <button class="gate-key" data-k="2">2</button>
+            <button class="gate-key" data-k="3">3</button>
+            <button class="gate-key" data-k="4">4</button>
+            <button class="gate-key" data-k="5">5</button>
+            <button class="gate-key" data-k="6">6</button>
+            <button class="gate-key" data-k="7">7</button>
+            <button class="gate-key" data-k="8">8</button>
+            <button class="gate-key" data-k="9">9</button>
+            <button class="gate-key" data-k="del">⌫</button>
+            <button class="gate-key" data-k="0">0</button>
+            <button class="gate-key" data-k="clr">✕</button>
+        </div>
+    </div>
+</div>
+
 <!-- ===== LOGIN ===== -->
-<div id="login-screen">
+<div id="login-screen" style="display:none">
     <div class="login-box">
         <div class="login-logo">PE-<span>Fabrikation</span></div>
         <div class="login-sub">Workflow Engine</div>
@@ -676,8 +723,19 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getFirestore, collection, addDoc, updateDoc, deleteDoc, onSnapshot, doc, getDoc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+    // ============================================================
+    // ZUGANGSCODE (STUFE 1) — gemeinsamer Code: 3161
+    // Erst nach korrekter Eingabe meldet sich die App bei Firebase an.
+    // Danach folgt wie gewohnt die Rollen-PIN-Auswahl (3166 / 8853).
+    // ============================================================
+    window.FAB_GATE = {
+        pin: "3161",
+        email: "zugang-fabrikation@pe-intern.local",
+        password: "PE-Zugang-3161f"
+    };
 
     const firebaseConfig = {
         apiKey: "AIzaSyBrpOIH2U5Egl5yiVX4RM2I9XI5kUU1UCw",
@@ -701,6 +759,64 @@
     let currentRole = null;
     let user = null, orders = [], team = [];
     let selectedIds = new Set();
+    let gateOk = false;
+
+    // ===== GATE (Zugangscode Stufe 1) =====
+    let gatePin = '';
+    const gateDotsEl = () => document.getElementById('gate-dots');
+    const renderGateDots = () => {
+        const dots = gateDotsEl().querySelectorAll('.gate-dot');
+        dots.forEach((d, i) => d.classList.toggle('filled', i < gatePin.length));
+    };
+    const setGateStatus = (msg, cls) => {
+        const el = document.getElementById('gate-status');
+        el.textContent = msg;
+        el.className = 'gate-status' + (cls ? ' ' + cls : '');
+    };
+    const submitGate = async () => {
+        const gate = window.FAB_GATE;
+        if (gatePin !== gate.pin) {
+            setGateStatus('Falscher Code', 'err');
+            setTimeout(() => { gatePin = ''; renderGateDots(); setGateStatus('\u00a0'); }, 900);
+            return;
+        }
+        setGateStatus('Prüfe...', '');
+        try {
+            await signInWithEmailAndPassword(auth, gate.email, gate.password);
+            gateOk = true;
+            setGateStatus('OK', 'ok');
+            document.getElementById('gate-screen').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+        } catch (e) {
+            console.error('Gate-Anmeldung fehlgeschlagen:', e.message);
+            setGateStatus('Zugang fehlgeschlagen', 'err');
+            setTimeout(() => { gatePin = ''; renderGateDots(); setGateStatus('\u00a0'); }, 1200);
+        }
+    };
+    document.getElementById('gate-pad').addEventListener('click', (e) => {
+        const btn = e.target.closest('.gate-key');
+        if (!btn) return;
+        const k = btn.dataset.k;
+        if (k === 'del') { gatePin = gatePin.slice(0, -1); }
+        else if (k === 'clr') { gatePin = ''; }
+        else if (gatePin.length < 4) { gatePin += k; }
+        renderGateDots();
+        setGateStatus('\u00a0');
+        if (gatePin.length === 4) submitGate();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (document.getElementById('gate-screen').style.display === 'none') return;
+        if (e.key >= '0' && e.key <= '9' && gatePin.length < 4) { gatePin += e.key; renderGateDots(); setGateStatus('\u00a0'); if (gatePin.length === 4) submitGate(); }
+        else if (e.key === 'Backspace') { gatePin = gatePin.slice(0, -1); renderGateDots(); setGateStatus('\u00a0'); }
+    });
+    // Bereits laufende Sitzung erkennen (Gate überspringen, falls schon angemeldet)
+    onAuthStateChanged(auth, (u) => {
+        if (u && u.email === window.FAB_GATE.email && !gateOk) {
+            gateOk = true;
+            document.getElementById('gate-screen').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+        }
+    });
 
     // ===== LOGIN =====
     window.doLogin = () => {
@@ -745,7 +861,8 @@
     });
 
     const initFirebase = () => {
-        signInAnonymously(auth);
+        // Zum Zeitpunkt des Rollen-Logins ist die Firebase-Anmeldung durch
+        // das Zugangscode-Gate bereits erfolgt (kein signInAnonymously mehr nötig).
         onAuthStateChanged(auth, u => {
             user = u;
             if (user) {
@@ -949,7 +1066,6 @@
     };
 
     // ===== KUJTIM NOTIZ SAVE =====
-    // Saves only the z_notiz field — does not touch any other order data
     window.saveZNotiz = async (orderId, btnEl, statusEl) => {
         if (!user) return;
         const textarea = document.getElementById(`z-notiz-${orderId}`);
