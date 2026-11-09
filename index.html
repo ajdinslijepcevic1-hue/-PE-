@@ -367,6 +367,7 @@
             <button class="nav-item" onclick="showView('montage')" id="nav-montage"><span class="nav-dot"></span> Inkl. Montage</button>
             <button class="nav-item" onclick="showView('erledigt')" id="nav-erledigt"><span class="nav-dot"></span> Erledigt</button>
             <button class="nav-item" onclick="showView('team')" id="nav-team"><span class="nav-dot"></span> Team</button>
+            <button class="nav-item" onclick="showView('einstellungen')" id="nav-einstellungen"><span class="nav-dot"></span> Einstellungen</button>
         </nav>
         <div class="sidebar-footer">
             <div style="display:flex;align-items:center;gap:8px">
@@ -507,6 +508,29 @@
         <!-- TEAM -->
         <div class="view" id="view-team">
             <div class="team-grid" id="team-list"></div>
+        </div>
+
+        <!-- EINSTELLUNGEN -->
+        <div class="view" id="view-einstellungen">
+            <div class="card" style="max-width:460px;padding:24px">
+                <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-3);font-family:'DM Mono',monospace;margin-bottom:18px">Admin-Code ändern</div>
+                <div class="form-group">
+                    <label class="form-label">Aktueller Code</label>
+                    <input type="password" id="pin-current" class="form-input" maxlength="4" inputmode="numeric" placeholder="····" oninput="this.value=this.value.replace(/\D/g,'')">
+                </div>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Neuer Code</label>
+                        <input type="password" id="pin-new" class="form-input" maxlength="4" inputmode="numeric" placeholder="····" oninput="this.value=this.value.replace(/\D/g,'')">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Neuer Code wiederholen</label>
+                        <input type="password" id="pin-new2" class="form-input" maxlength="4" inputmode="numeric" placeholder="····" oninput="this.value=this.value.replace(/\D/g,'')">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="changeAdminPin()">Code speichern</button>
+                <div id="pin-status" style="margin-top:12px;font-size:13px;min-height:18px"></div>
+            </div>
         </div>
     </main>
 </div>
@@ -753,6 +777,27 @@
     const appId = 'gzaa-d38df';
     const ordersCol = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
     const teamCol   = collection(db, 'artifacts', appId, 'public', 'data', 'team');
+    const settingsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'codes');
+
+    // ===== ADMIN-CODE (änderbar in Einstellungen) =====
+    // Standard-Code, solange in Firebase noch kein eigener Code gespeichert ist.
+    const DEFAULT_ADMIN_PIN = '3166';
+    const ZEICHNER_PIN = '8853';
+    // Der Code wird nur als SHA-256-Hash gespeichert, nicht im Klartext.
+    const hashPin = async (pin) => {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('pe-fab:' + pin));
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    };
+    const checkAdminPin = async (pin) => {
+        try {
+            const snap = await getDoc(settingsDoc);
+            const h = snap.exists() ? snap.data().adminPinHash : null;
+            if (h) return (await hashPin(pin)) === h;
+        } catch (e) {
+            console.error('Einstellungen konnten nicht geladen werden:', e.message);
+        }
+        return pin === DEFAULT_ADMIN_PIN;
+    };
 
     const CHUNK_SIZE = 500 * 1024;
 
@@ -819,15 +864,15 @@
     });
 
     // ===== LOGIN =====
-    window.doLogin = () => {
+    window.doLogin = async () => {
         const code = document.getElementById('login-code').value.trim();
-        if (code === '3166') {
+        if (code.length === 4 && code !== ZEICHNER_PIN && await checkAdminPin(code)) {
             currentRole = 'admin';
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('admin-app').style.display = 'flex';
             initDates();
             initFirebase();
-        } else if (code === '8853') {
+        } else if (code === ZEICHNER_PIN) {
             currentRole = 'zeichner';
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('zeichner-app').style.display = 'block';
@@ -1506,7 +1551,7 @@
     };
 
     // ===== VIEWS =====
-    const ALL_VIEWS = ['dashboard','druckbereit','montage','erledigt','team'];
+    const ALL_VIEWS = ['dashboard','druckbereit','montage','erledigt','team','einstellungen'];
     window.showView = (v) => {
         ALL_VIEWS.forEach(x => {
             document.getElementById(`view-${x}`).classList.remove('active');
@@ -1514,10 +1559,32 @@
         });
         document.getElementById(`view-${v}`).classList.add('active');
         document.getElementById(`nav-${v}`).classList.add('active');
-        document.getElementById('view-title').textContent = { dashboard:'Dashboard', druckbereit:'Druckbereit', montage:'Inkl. Montage', erledigt:'Erledigt', team:'Team' }[v];
+        document.getElementById('view-title').textContent = { dashboard:'Dashboard', druckbereit:'Druckbereit', montage:'Inkl. Montage', erledigt:'Erledigt', team:'Team', einstellungen:'Einstellungen' }[v];
+        document.getElementById('header-actions').style.display = v === 'einstellungen' ? 'none' : '';
         document.getElementById('header-actions').innerHTML = v === 'team'
             ? `<button class="btn btn-primary" onclick="openModal('modal-team')"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>Mitglied hinzufügen</button>`
             : `<button class="btn btn-primary" onclick="openOrderModal()"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>Neuer Auftrag</button>`;
+    };
+
+    window.changeAdminPin = async () => {
+        const cur = document.getElementById('pin-current').value.trim();
+        const n1  = document.getElementById('pin-new').value.trim();
+        const n2  = document.getElementById('pin-new2').value.trim();
+        const st  = document.getElementById('pin-status');
+        const msg = (t, ok) => { st.textContent = t; st.style.color = ok ? 'var(--accent)' : '#c0392b'; };
+        if (!/^\d{4}$/.test(n1)) return msg('Der neue Code muss genau 4 Ziffern haben.');
+        if (n1 !== n2) return msg('Die neuen Codes stimmen nicht überein.');
+        if (n1 === ZEICHNER_PIN || n1 === window.FAB_GATE.pin) return msg('Dieser Code ist bereits vergeben. Bitte einen anderen wählen.');
+        msg('Prüfe...', true);
+        if (!(await checkAdminPin(cur))) return msg('Der aktuelle Code ist falsch.');
+        try {
+            await setDoc(settingsDoc, { adminPinHash: await hashPin(n1), updatedAt: new Date().toISOString() }, { merge: true });
+            ['pin-current','pin-new','pin-new2'].forEach(id => document.getElementById(id).value = '');
+            msg('Neuer Admin-Code gespeichert. Ab der nächsten Anmeldung gilt nur noch dieser Code.', true);
+        } catch (e) {
+            console.error('Code speichern fehlgeschlagen:', e.message);
+            msg('Speichern fehlgeschlagen: ' + e.message);
+        }
     };
 
     window.closeModal = id => document.getElementById(id).classList.remove('open');
