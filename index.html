@@ -263,6 +263,18 @@
         .modal-footer .btn { flex: 1; justify-content: center; }
 
         .form-group { margin-bottom: 16px; }
+        /* ===== ZUSCHAUER-MODUS: alles sehen, nichts bearbeiten ===== */
+        .viewer-mode #header-actions,
+        .viewer-mode #nav-einstellungen,
+        .viewer-mode #bulk-bar,
+        .viewer-mode .pdf-delete,
+        .viewer-mode .pdf-upload-btn,
+        .viewer-mode .team-remove,
+        .viewer-mode #admin-app thead th:last-child,
+        .viewer-mode #admin-app td:has(> .actions-cell),
+        .viewer-mode #view-dashboard thead th:first-child,
+        .viewer-mode #view-dashboard td:has(> .row-cb) { display: none !important; }
+        .role-viewer { background: #eef1f6; color: #4a5a78; border: 1px solid #d3dae6; }
         .form-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-3); font-family: 'DM Mono', monospace; margin-bottom: 6px; }
         .form-input { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text); background: var(--surface); outline: none; transition: border-color 0.15s; }
         .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
@@ -372,7 +384,7 @@
         <div class="sidebar-footer">
             <div style="display:flex;align-items:center;gap:8px">
                 <div class="status-dot"></div>
-                <span class="status-text">Admin</span>
+                <span class="status-text" id="admin-status-text">Admin</span>
             </div>
             <button class="logout-btn" onclick="doLogout()" title="Abmelden">
                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
@@ -387,7 +399,7 @@
                 <div class="page-date" id="current-date"></div>
             </div>
             <div style="display:flex;align-items:center;gap:10px">
-                <span class="role-badge role-admin">Admin</span>
+                <span class="role-badge role-admin" id="admin-role-badge">Admin</span>
                 <div id="header-actions">
                     <button class="btn btn-primary" onclick="openOrderModal()">
                         <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>
@@ -530,6 +542,27 @@
                 </div>
                 <button class="btn btn-primary" onclick="changeAdminPin()">Code speichern</button>
                 <div id="pin-status" style="margin-top:12px;font-size:13px;min-height:18px"></div>
+            </div>
+
+            <div class="card" style="max-width:460px;padding:24px;margin-top:20px">
+                <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-3);font-family:'DM Mono',monospace;margin-bottom:6px">Zuschauer-Code</div>
+                <div style="font-size:13px;color:var(--text-2);margin-bottom:6px">Mit diesem Code sieht man alle Aufträge, PDFs und das Team, kann aber nichts bearbeiten, hochladen oder löschen.</div>
+                <div id="viewer-pin-state" style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text-3);margin-bottom:16px">Status: wird geladen...</div>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Zuschauer-Code</label>
+                        <input type="password" id="viewer-pin-new" class="form-input" maxlength="4" inputmode="numeric" placeholder="····" oninput="this.value=this.value.replace(/\D/g,'')">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Code wiederholen</label>
+                        <input type="password" id="viewer-pin-new2" class="form-input" maxlength="4" inputmode="numeric" placeholder="····" oninput="this.value=this.value.replace(/\D/g,'')">
+                    </div>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
+                    <button class="btn btn-primary" onclick="saveViewerPin()">Zuschauer-Code speichern</button>
+                    <button class="btn btn-ghost" onclick="disableViewerPin()">Zuschauer-Zugang deaktivieren</button>
+                </div>
+                <div id="viewer-pin-status" style="margin-top:12px;font-size:13px;min-height:18px"></div>
             </div>
         </div>
     </main>
@@ -798,6 +831,18 @@
         }
         return pin === DEFAULT_ADMIN_PIN;
     };
+    // Zuschauer-Code: nur gültig, wenn der Admin einen gespeichert hat.
+    const checkViewerPin = async (pin) => {
+        try {
+            const snap = await getDoc(settingsDoc);
+            const h = snap.exists() ? snap.data().viewerPinHash : null;
+            return !!h && (await hashPin(pin)) === h;
+        } catch (e) {
+            console.error('Einstellungen konnten nicht geladen werden:', e.message);
+            return false;
+        }
+    };
+    const isViewer = () => currentRole === 'viewer';
 
     const CHUNK_SIZE = 500 * 1024;
 
@@ -872,6 +917,17 @@
             document.getElementById('admin-app').style.display = 'flex';
             initDates();
             initFirebase();
+        } else if (code.length === 4 && await checkViewerPin(code)) {
+            currentRole = 'viewer';
+            document.body.classList.add('viewer-mode');
+            document.getElementById('admin-role-badge').textContent = 'Zuschauer';
+            document.getElementById('admin-role-badge').className = 'role-badge role-viewer';
+            document.getElementById('admin-status-text').textContent = 'Zuschauer';
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('admin-app').style.display = 'flex';
+            window.showView('dashboard');
+            initDates();
+            initFirebase();
         } else if (code === ZEICHNER_PIN) {
             currentRole = 'zeichner';
             document.getElementById('login-screen').style.display = 'none';
@@ -890,6 +946,13 @@
 
     window.doLogout = () => {
         currentRole = null;
+        selectedIds.clear();
+        document.body.classList.remove('viewer-mode');
+        document.getElementById('admin-role-badge').textContent = 'Admin';
+        document.getElementById('admin-role-badge').className = 'role-badge role-admin';
+        document.getElementById('admin-status-text').textContent = 'Admin';
+        document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+        window.showView('dashboard');
         document.getElementById('admin-app').style.display = 'none';
         document.getElementById('zeichner-app').style.display = 'none';
         document.getElementById('login-screen').style.display = 'flex';
@@ -913,12 +976,12 @@
             if (user) {
                 onSnapshot(ordersCol, snap => {
                     orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    if (currentRole === 'admin') renderAll();
+                    if (currentRole === 'admin' || currentRole === 'viewer') renderAll();
                     else renderZeichner();
                 });
                 onSnapshot(teamCol, snap => {
                     team = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                    if (currentRole === 'admin') { renderTeam(); updateAssigneeDropdown(); }
+                    if (currentRole === 'admin' || currentRole === 'viewer') { renderTeam(); updateAssigneeDropdown(); }
                 });
             }
         });
@@ -1561,6 +1624,7 @@
         document.getElementById(`nav-${v}`).classList.add('active');
         document.getElementById('view-title').textContent = { dashboard:'Dashboard', druckbereit:'Druckbereit', montage:'Inkl. Montage', erledigt:'Erledigt', team:'Team', einstellungen:'Einstellungen' }[v];
         document.getElementById('header-actions').style.display = v === 'einstellungen' ? 'none' : '';
+        if (v === 'einstellungen') loadViewerPinState();
         document.getElementById('header-actions').innerHTML = v === 'team'
             ? `<button class="btn btn-primary" onclick="openModal('modal-team')"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>Mitglied hinzufügen</button>`
             : `<button class="btn btn-primary" onclick="openOrderModal()"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>Neuer Auftrag</button>`;
@@ -1577,6 +1641,7 @@
         if (n1 === ZEICHNER_PIN || n1 === window.FAB_GATE.pin) return msg('Dieser Code ist bereits vergeben. Bitte einen anderen wählen.');
         msg('Prüfe...', true);
         if (!(await checkAdminPin(cur))) return msg('Der aktuelle Code ist falsch.');
+        if (await checkViewerPin(n1)) return msg('Dieser Code ist bereits der Zuschauer-Code. Bitte einen anderen wählen.');
         try {
             await setDoc(settingsDoc, { adminPinHash: await hashPin(n1), updatedAt: new Date().toISOString() }, { merge: true });
             ['pin-current','pin-new','pin-new2'].forEach(id => document.getElementById(id).value = '');
@@ -1587,8 +1652,63 @@
         }
     };
 
+    // ===== ZUSCHAUER-CODE =====
+    const loadViewerPinState = async () => {
+        const el = document.getElementById('viewer-pin-state');
+        try {
+            const snap = await getDoc(settingsDoc);
+            const active = snap.exists() && !!snap.data().viewerPinHash;
+            el.textContent = active ? 'Status: aktiv' : 'Status: kein Zuschauer-Code gesetzt';
+            el.style.color = active ? 'var(--accent)' : 'var(--text-3)';
+        } catch (e) { el.textContent = 'Status: unbekannt'; }
+    };
+    window.saveViewerPin = async () => {
+        const n1 = document.getElementById('viewer-pin-new').value.trim();
+        const n2 = document.getElementById('viewer-pin-new2').value.trim();
+        const st = document.getElementById('viewer-pin-status');
+        const msg = (t, ok) => { st.textContent = t; st.style.color = ok ? 'var(--accent)' : '#c0392b'; };
+        if (!/^\d{4}$/.test(n1)) return msg('Der Code muss genau 4 Ziffern haben.');
+        if (n1 !== n2) return msg('Die Codes stimmen nicht überein.');
+        if (n1 === ZEICHNER_PIN || n1 === window.FAB_GATE.pin) return msg('Dieser Code ist bereits vergeben. Bitte einen anderen wählen.');
+        msg('Prüfe...', true);
+        if (await checkAdminPin(n1)) return msg('Das ist der Admin-Code. Bitte einen anderen wählen.');
+        try {
+            await setDoc(settingsDoc, { viewerPinHash: await hashPin(n1), updatedAt: new Date().toISOString() }, { merge: true });
+            ['viewer-pin-new','viewer-pin-new2'].forEach(id => document.getElementById(id).value = '');
+            msg('Zuschauer-Code gespeichert.', true);
+            loadViewerPinState();
+        } catch (e) {
+            console.error('Zuschauer-Code speichern fehlgeschlagen:', e.message);
+            msg('Speichern fehlgeschlagen: ' + e.message);
+        }
+    };
+    window.disableViewerPin = async () => {
+        const st = document.getElementById('viewer-pin-status');
+        if (!confirm('Zuschauer-Zugang wirklich deaktivieren? Der Zuschauer-Code funktioniert danach nicht mehr.')) return;
+        try {
+            await setDoc(settingsDoc, { viewerPinHash: null, updatedAt: new Date().toISOString() }, { merge: true });
+            st.textContent = 'Zuschauer-Zugang deaktiviert.'; st.style.color = 'var(--accent)';
+            loadViewerPinState();
+        } catch (e) {
+            st.textContent = 'Fehler: ' + e.message; st.style.color = '#c0392b';
+        }
+    };
+
     window.closeModal = id => document.getElementById(id).classList.remove('open');
     window.openModal  = id => document.getElementById(id).classList.add('open');
+
+    // Sperre: Im Zuschauer-Modus lösen alle Bearbeitungsfunktionen nichts aus,
+    // auch wenn jemand versucht, sie direkt aufzurufen.
+    ['openOrderModal','openEditModal','saveOrder','_statusModal','_deleteModal','_deleteTeam',
+     '_restoreOrder','addTeamMember','bulkDelete','bulkMarkDone','toggleSelectAll','_toggleRow',
+     'openPdfModal','startPdfUpload','deletePdf','changeAdminPin','saveViewerPin','disableViewerPin',
+     'openModal','saveZNotiz','_kujtimErledigen'
+    ].forEach(name => {
+        const fn = window[name];
+        if (typeof fn !== 'function') return;
+        window[name] = (...args) => { if (isViewer()) return; return fn(...args); };
+    });
+
 
     document.querySelectorAll('.modal-overlay').forEach(el =>
         el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); })
