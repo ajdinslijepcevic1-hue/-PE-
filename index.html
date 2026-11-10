@@ -271,6 +271,7 @@
         .viewer-mode .pdf-delete,
         .viewer-mode .pdf-upload-btn,
         .viewer-mode .team-remove,
+        .viewer-mode .z-notiz-bubble,
         .viewer-mode #admin-app thead th:last-child,
         .viewer-mode #admin-app td:has(> .actions-cell),
         .viewer-mode #view-dashboard thead th:first-child,
@@ -1031,6 +1032,7 @@
 
     // Kujtims Notiz (grüne Bubble) — sichtbar nur im Admin-Dashboard
     const zNotizHtml = o => {
+        if (currentRole === 'viewer') return ''; // Zuschauer sehen die grünen Kujtim-Notizen nicht
         if (!o.z_notiz || !o.z_notiz.trim()) return '';
         const escaped = o.z_notiz.replace(/</g,'&lt;').replace(/>/g,'&gt;');
         return `<div class="notiz-cell"><span class="z-notiz-bubble">${escaped}</span></div>`;
