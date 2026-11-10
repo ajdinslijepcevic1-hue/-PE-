@@ -263,6 +263,7 @@
         .modal-footer .btn { flex: 1; justify-content: center; }
 
         .form-group { margin-bottom: 16px; }
+        .pin-field { -webkit-text-security: disc; text-security: disc; letter-spacing: 0.3em; }
         /* ===== ZUSCHAUER-MODUS: alles sehen, nichts bearbeiten ===== */
         .viewer-mode #header-actions,
         .viewer-mode #nav-einstellungen,
@@ -528,16 +529,16 @@
                 <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-3);font-family:'DM Mono',monospace;margin-bottom:18px">Admin-Code ändern</div>
                 <div class="form-group">
                     <label class="form-label">Aktueller Code</label>
-                    <input type="password" id="pin-current" class="form-input" maxlength="4" inputmode="numeric" placeholder="····" oninput="this.value=this.value.replace(/\D/g,'')">
+                    <input type="text" id="pin-current" name="pe-pin-current" class="form-input pin-field" autocomplete="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore maxlength="4" inputmode="numeric" placeholder="····" oninput="this.value=this.value.replace(/\D/g,'')">
                 </div>
                 <div class="form-grid-2">
                     <div class="form-group">
                         <label class="form-label">Neuer Code</label>
-                        <input type="password" id="pin-new" class="form-input" maxlength="4" inputmode="numeric" placeholder="····" oninput="this.value=this.value.replace(/\D/g,'')">
+                        <input type="text" id="pin-new" name="pe-pin-new" class="form-input pin-field" autocomplete="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore maxlength="4" inputmode="numeric" placeholder="····" oninput="this.value=this.value.replace(/\D/g,'')">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Neuer Code wiederholen</label>
-                        <input type="password" id="pin-new2" class="form-input" maxlength="4" inputmode="numeric" placeholder="····" oninput="this.value=this.value.replace(/\D/g,'')">
+                        <input type="text" id="pin-new2" name="pe-pin-new2" class="form-input pin-field" autocomplete="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore maxlength="4" inputmode="numeric" placeholder="····" oninput="this.value=this.value.replace(/\D/g,'')">
                     </div>
                 </div>
                 <button class="btn btn-primary" onclick="changeAdminPin()">Code speichern</button>
@@ -551,11 +552,11 @@
                 <div class="form-grid-2">
                     <div class="form-group">
                         <label class="form-label">Zuschauer-Code</label>
-                        <input type="password" id="viewer-pin-new" class="form-input" maxlength="4" inputmode="numeric" placeholder="····" oninput="this.value=this.value.replace(/\D/g,'')">
+                        <input type="text" id="viewer-pin-new" name="pe-viewer-pin-new" class="form-input pin-field" autocomplete="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore maxlength="4" inputmode="numeric" placeholder="····" oninput="this.value=this.value.replace(/\D/g,'')">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Code wiederholen</label>
-                        <input type="password" id="viewer-pin-new2" class="form-input" maxlength="4" inputmode="numeric" placeholder="····" oninput="this.value=this.value.replace(/\D/g,'')">
+                        <input type="text" id="viewer-pin-new2" name="pe-viewer-pin-new2" class="form-input pin-field" autocomplete="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore maxlength="4" inputmode="numeric" placeholder="····" oninput="this.value=this.value.replace(/\D/g,'')">
                     </div>
                 </div>
                 <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -1624,7 +1625,7 @@
         document.getElementById(`nav-${v}`).classList.add('active');
         document.getElementById('view-title').textContent = { dashboard:'Dashboard', druckbereit:'Druckbereit', montage:'Inkl. Montage', erledigt:'Erledigt', team:'Team', einstellungen:'Einstellungen' }[v];
         document.getElementById('header-actions').style.display = v === 'einstellungen' ? 'none' : '';
-        if (v === 'einstellungen') loadViewerPinState();
+        if (v === 'einstellungen') { document.querySelectorAll('.pin-field').forEach(f => { f.value = ''; f.disabled = false; f.readOnly = false; }); loadViewerPinState(); }
         document.getElementById('header-actions').innerHTML = v === 'team'
             ? `<button class="btn btn-primary" onclick="openModal('modal-team')"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>Mitglied hinzufügen</button>`
             : `<button class="btn btn-primary" onclick="openOrderModal()"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>Neuer Auftrag</button>`;
